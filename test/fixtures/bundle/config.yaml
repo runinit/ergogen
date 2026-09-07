@@ -6,6 +6,7 @@ outlines:
       size: 18
 pcbs:
   pcb:
+    template: kicad5
     outlines.edge.outline: box
     footprints:
       injected:

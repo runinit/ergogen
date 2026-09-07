@@ -6,4 +6,5 @@ outlines:
       where: true
       size: 18
 pcbs:
-  export: {}
+  export:
+    template: kicad5

@@ -27,5 +27,7 @@ cases:
             name: export
             extrude: 1
 pcbs:
-    export: {}
-    _export: {}
+    export:
+        template: kicad5
+    _export:
+        template: kicad5
