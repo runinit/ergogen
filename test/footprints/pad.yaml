@@ -39,3 +39,5 @@ pcbs.pcb.footprints:
       align: left
       mirrored: true
     adjust.shift: [100, 50]
+
+pcbs.pcb.template: kicad5

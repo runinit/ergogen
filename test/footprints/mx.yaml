@@ -49,3 +49,5 @@ pcbs.pcb.footprints:
       reverse: true
       hotswap: true
     adjust.shift: [250, 0]
+
+pcbs.pcb.template: kicad5

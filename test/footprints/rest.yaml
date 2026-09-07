@@ -83,3 +83,5 @@ pcbs.pcb.footprints:
       to: to
       side: B
     adjust.shift: [100, 150]
+
+pcbs.pcb.template: kicad5

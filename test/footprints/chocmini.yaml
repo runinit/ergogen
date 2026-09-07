@@ -31,3 +31,5 @@ pcbs.pcb.footprints:
       keycaps: true
       reverse: true
     adjust.shift: [150, 0]
+
+pcbs.pcb.template: kicad5

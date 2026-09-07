@@ -3,9 +3,11 @@ points.zones.matrix:
   rows.only:
 pcbs:
   shown:
+    template: kicad5
     references: true
     footprints:
       - what: references_test
   hidden:
+    template: kicad5
     footprints:
       - what: references_test

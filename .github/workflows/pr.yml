@@ -1,15 +1,22 @@
-name: Check for 100% test coverage
+name: Validate generator
 on:
   pull_request:
-    branches: ["develop"]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: url.https://github.com/.insteadOf
+      GIT_CONFIG_VALUE_0: ssh://git@github.com/
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-      - run: npm install
+          node-version: '24.x'
+          cache: npm
+      - run: npm ci
       - run: npm run coverage
+      - run: node test/validation/legacy.js
+      - run: npm run build
+      - run: npm pack

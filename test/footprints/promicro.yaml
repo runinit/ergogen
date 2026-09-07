@@ -9,3 +9,5 @@ pcbs.pcb.footprints:
     params:
       orientation: up
     adjust.shift: [50, 0]
+
+pcbs.pcb.template: kicad5

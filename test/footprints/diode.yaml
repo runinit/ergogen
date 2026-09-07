@@ -4,3 +4,5 @@ pcbs.pcb.footprints:
     params:
       from: from
       to: to
+
+pcbs.pcb.template: kicad5

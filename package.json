@@ -1,14 +1,16 @@
 {
-    "name": "ergogen",
-    "version": "4.2.1",
+    "name": "@runinit/ergogen",
+    "version": "5.0.0",
     "description": "Ergonomic keyboard layout generator",
-    "author": "Bán Dénes <mr@zealot.hu>",
+    "author": "B\u00e1n D\u00e9nes <mr@zealot.hu>",
     "license": "MIT",
     "homepage": "https://ergogen.xyz",
-    "repository": "github:ergogen/ergogen",
-    "bugs": "https://github.com/ergogen/ergogen/issues",
+    "repository": "github:runinit/ergogen",
+    "bugs": "https://github.com/runinit/ergogen/issues",
     "main": "./src/ergogen.js",
-    "bin": "./src/cli.js",
+    "bin": {
+        "ergogen": "./src/cli.js"
+    },
     "scripts": {
         "build": "rollup -c",
         "test": "mocha -r test/helpers/register test/index.js",
@@ -16,10 +18,10 @@
     },
     "dependencies": {
         "fs-extra": "^11.3.2",
-        "hull": "github:andriiheonia/hull",
+        "hull": "github:andriiheonia/hull#5847b0a4fa23f8e5aa3c37a8e6d7b8cf58f24082",
         "js-yaml": "^3.14.1",
         "jszip": "^3.10.1",
-        "kle-serial": "github:ergogen/kle-serial#ergogen",
+        "kle-serial": "github:ergogen/kle-serial#61f29f317d87bbfed0b0b7e646e1b91d4384ac02",
         "makerjs": "^0.18.1",
         "mathjs": "^15.0.0",
         "yargs": "^17.7.2"
@@ -41,5 +43,8 @@
         "include": [
             "src/**/*.js"
         ]
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

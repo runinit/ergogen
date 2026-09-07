@@ -29,3 +29,5 @@ pcbs.pcb.footprints:
       reverse: true
       symmetric: true
     adjust.shift: [100, 0]
+
+pcbs.pcb.template: kicad5

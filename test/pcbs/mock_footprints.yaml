@@ -9,6 +9,7 @@ outlines:
       size: u
 pcbs:
   main:
+    template: kicad5
     outlines:
       edge:
         outline: edge

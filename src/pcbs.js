@@ -31,7 +31,7 @@ const net_obj = (name, index) => {
     return {
         name,
         index,
-        str: `(net ${index} "${name}")`,
+        str: `(net ${index} ${JSON.stringify(name)})`,
         toString: function() { return this.str }
     }
 }
@@ -108,7 +108,8 @@ const footprint = exports._footprint = (points, net_indexer, component_indexer, 
         if (['string', 'number', 'boolean', 'array', 'object'].includes(type)) {
             parsed_params[param_name] = value
         } else if (type == 'net') {
-            const net = a.sane(value, `${name}.params.${param_name}`, 'string')(units)
+            a.assert(typeof value === 'string', `Field ${name}.params.${param_name} should be a net name string!`)
+            const net = value
             const index = net_indexer(net)
             parsed_params[param_name] = net_obj(net, index)
         } else { // anchor
@@ -168,7 +169,7 @@ exports.parse = (config, points, outlines, units) => {
         // config sanitization
         a.unexpected(pcb_config, `pcbs.${pcb_name}`, ['outlines', 'footprints', 'references', 'template', 'params'])
         const references = a.sane(pcb_config.references || false, `pcbs.${pcb_name}.references`, 'boolean')()
-        const template = template_types[a.in(pcb_config.template || 'kicad5', `pcbs.${pcb_name}.template`, Object.keys(template_types))]
+        const template = template_types[a.in(pcb_config.template || 'kicad10', `pcbs.${pcb_name}.template`, Object.keys(template_types))]
 
         // outline conversion
         if (a.type(pcb_config.outlines)() == 'array') {
@@ -183,7 +184,7 @@ exports.parse = (config, points, outlines, units) => {
         }
 
         // making a global net index registry
-        const nets = {"": 0}
+        const nets = Object.assign(Object.create(null), {"": 0})
         const net_indexer = net => {
             if (nets[net] !== undefined) return nets[net]
             const index = Object.keys(nets).length

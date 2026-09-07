@@ -29,6 +29,7 @@ outlines:
       operation: subtract
 pcbs:
   main:
+    template: kicad5
     outlines:
       - outline: 'left'
       - outline: 'right'
