@@ -16,9 +16,11 @@ exports.compile = async (config, context, options = {}) => {
     if (!entries.length) { return {} }
     const kernel = await require('./solid-kernel').open(options)
     const results = {}
+    let activeFeature = 'designs.assemblies'
     try {
         for (const [id, input] of entries) {
             const name = `designs.assemblies.${id}`
+            activeFeature = name
             const s = normalize(input, name, context.units)
             const {resolve, locate, shape, publish, report} = context
             const base = resolve(s.profile).model
@@ -29,19 +31,20 @@ exports.compile = async (config, context, options = {}) => {
             if (clearance >= s.bezel) { g.fail(name, 'Increase bezel width to retain walls around the cavity') }
             const cavity = g.round(g.offset(base, clearance), internalRadius)
             const exterior = g.offset(base, s.bezel + s.wall)
-            const opening = s.opening ? resolve(s.opening).model : g.round(g.offset(base, internalRadius), internalRadius)
+            let opening = s.opening ? resolve(s.opening).model : g.round(g.offset(base, internalRadius), internalRadius)
             const ring = subtract(exterior, cavity)
-            const bezel = subtract(exterior, opening)
             const extents = m.measure.modelExtents(exterior)
             const seam = g.number(s.seam?.z ?? s.plate_z, `${name}.seam.z`, context.units)
             if (seam <= s.floor || seam >= s.height - s.wall) { g.fail(`${name}.seam`, 'Seam must lie between floor and upper bezel') }
+            const middleSplit=s.construction==='midframe' ? Math.max(seam+s.wall,s.plate_z+s.plate+(floating?s.gasket.compressed+s.gasket.travel_up+s.gasket.fit:0)) : seam
+            if (s.construction==='midframe' && middleSplit>=s.height-s.wall) { g.fail(`${name}.construction`,'Increase shell height to fit the middle frame and top cover.') }
+
             const lift = s.front_height - s.height * Math.cos(s.typing_angle * RAD)
             const wedge = extents.height * Math.tan(s.typing_angle * RAD) + lift / Math.cos(s.typing_angle * RAD)
             let bottom = kernel.extrude(exterior, s.floor + wedge, -wedge)
             bottom = kernel.add(bottom, kernel.extrude(ring, seam - s.floor, s.floor))
             let top = kernel.extrude(ring, s.height - seam, seam)
             const roof = Math.min(s.wall, s.height - s.plate_z - s.plate)
-            top = kernel.add(top, kernel.extrude(bezel, roof, s.height - roof))
             let plateModel = s.plate_profile ? resolve(s.plate_profile).model : g.clone(base)
             for (const ref of s.cutouts || []) {
                 const cutout = resolve(ref).model
@@ -62,6 +65,7 @@ exports.compile = async (config, context, options = {}) => {
             if (floating) {
                 for (const [tabId, definition] of Object.entries(s.gaskets)) {
                     const path = `${name}.gaskets.${tabId}`
+                    activeFeature = path
                     const tab = shape(definition, path)
                     clearPlate(tab, path)
                     if (!intersects(tab, base)) { g.fail(path, 'Gasket tab must overlap the plate') }
@@ -76,11 +80,11 @@ exports.compile = async (config, context, options = {}) => {
                         g.fail(path, 'Increase case height or adjust plate height for gasket shelves')
                     }
                     const relief = kernel.extrude(pocket, high - low, low)
-                    bottom = kernel.cut(bottom, relief)
-                    top = kernel.cut(top, relief)
-                    const shelf = g.combine(pocket, g.combine(ring, g.offset(pocket, s.wall), 'intersect'))
+                    const shelf = intersects(pocket, ring) ? pocket : g.combine(pocket, g.combine(ring, g.offset(pocket, s.wall), 'intersect'))
                     bottom = kernel.add(bottom, kernel.extrude(shelf, s.wall, low - s.wall))
                     top = kernel.add(top, kernel.extrude(shelf, s.wall, high))
+                    bottom = kernel.cut(bottom, relief)
+                    top = kernel.cut(top, relief)
                     if (s.gasket.kind === 'sleeves') {
                         const sleeveOuter = g.offset(tab, s.gasket.thickness)
                         g.requireContains(exterior, sleeveOuter, path)
@@ -95,6 +99,23 @@ exports.compile = async (config, context, options = {}) => {
                     features.push({id: `gaskets.${tabId}`, model: pocket, z: low, height: high - low})
                 }
             }
+
+            // Cover the contact footprint at roof height while the plate remains an independent part.
+            if (floating && s.construction && contacts.length) {
+                const concealed=g.union(contacts.map(contact=>g.offset(contact.model,s.gasket.fit+s.gasket.travel_side)))
+                opening=subtract(opening,concealed)
+                if (internalRadius) {
+                    m.model.originate(opening)
+                    opening.models ||= {}
+                    for (const [index,chain] of g.chains(opening).entries()) {
+                        const direction=m.measure.isChainClockwise(chain)?'right':'left'
+                        opening.models[`__cover_rounds_${index}`]=m.chain.fillet(chain,{[direction]:internalRadius})
+                    }
+                }
+                for (const ref of s.cutouts || []) { g.requireContains(opening,resolve(ref).model,`${name}.construction`) }
+                for (const contact of contacts) { g.requireContains(subtract(exterior,opening),contact.model,`${name}.gaskets.${contact.id}.cover`) }
+            }
+            top=kernel.add(top,kernel.extrude(subtract(exterior,opening),roof,s.height-roof))
 
             // Optional continuous ledge belongs to the fixed plate support system.
             if (s.ledge) {
@@ -116,10 +137,14 @@ exports.compile = async (config, context, options = {}) => {
                 top = kernel.cut(top, kernel.extrude(g.offset(lip, fit), depth + fit, seam))
             }
 
-            const pcbModel = s.pcb_profile ? resolve(s.pcb_profile).model : null
+            let pcbModel = s.pcb_profile ? resolve(s.pcb_profile).model : null
+            for (const hole of context.boards?.[id]?.holes || []) {
+                pcbModel = subtract(pcbModel,circle(hole.position,hole.diameter/2))
+            }
             const mountTable = {}
             for (const [mountId, mount] of Object.entries(s.mounts || {})) {
                 const path = `${name}.mounts.${mountId}`
+                activeFeature = path
                 const p = locate(mount.anchor, `${path}.anchor`).p
                 const role = mount.role || 'case'
                 if (!['case', 'plate', 'pcb'].includes(role)) { g.fail(path, 'Unknown mounting target') }
@@ -151,8 +176,19 @@ exports.compile = async (config, context, options = {}) => {
                 const start = topMount ? (access === 'bottom' ? s.plate_z : Math.max(s.plate_z, s.height - depth))
                     : access === 'bottom' ? 0 : Math.max(0, targetZ - depth)
                 const drill = kernel.extrude(circle(p, hole), depth + (role === 'case' ? s.height - seam : s.plate), start)
-                bottom = kernel.cut(bottom, drill)
-                top = kernel.cut(top, drill)
+                if (role === 'case' && mount.clearance && mount.hardware === 'tapped') {
+                    const clearance = g.positive(mount.clearance, `${path}.clearance`, context.units)
+                    const head = g.positive(mount.head, `${path}.head`, context.units)
+                    const headDepth = g.positive(mount.head_depth, `${path}.head_depth`, context.units)
+                    if (clearance <= hole || head <= clearance || head >= radius || headDepth >= seam - s.floor) { g.fail(path, 'Screw clearance and head pocket do not fit the closing post') }
+                    bottom = kernel.cut(bottom, kernel.extrude(circle(p, clearance), seam))
+                    bottom = kernel.cut(bottom, kernel.extrude(circle(p, head), headDepth))
+                    if (middleSplit>seam) { top=kernel.cut(top,kernel.extrude(circle(p,clearance),middleSplit-seam,seam)) }
+                    top = kernel.cut(top, kernel.extrude(circle(p, hole), Math.min(depth, s.height - middleSplit - s.wall / 2), middleSplit))
+                } else {
+                    bottom = kernel.cut(bottom, drill)
+                    top = kernel.cut(top, drill)
+                }
                 if (role === 'plate') { plateModel = subtract(plateModel, circle(p, hole)) }
                 if (mount.hardware && mount.hardware !== 'plain') {
                     if (!['insert', 'nut', 'tapped'].includes(mount.hardware)) { g.fail(path, 'Unknown fastener type') }
@@ -174,6 +210,17 @@ exports.compile = async (config, context, options = {}) => {
                         else { bottom = kernel.cut(bottom, pocket) }
                     }
                 }
+                if (role === 'case' && mount.screw && access === 'bottom') {
+                    const screw=mount.screw
+                    const headHeight=g.positive(screw.head_height,`${path}.screw.head_height`,context.units)
+                    const headRadius=g.positive(screw.head_diameter,`${path}.screw.head_diameter`,context.units)/2
+                    const shankRadius=g.positive(screw.diameter,`${path}.screw.diameter`,context.units)/2
+                    if (headHeight>mount.head_depth || headRadius>=mount.head || shankRadius>=mount.clearance) { g.fail(path,'The screw does not fit its head pocket or clearance bore.','hardware') }
+                    const topZ=middleSplit+Math.min(depth,s.height-middleSplit-s.wall/2)
+                    const head=kernel.extrude(circle(p,headRadius),headHeight)
+                    extras[`screws_${mountId}`]=kernel.add(head,kernel.extrude(circle(p,shankRadius),topZ-headHeight,headHeight))
+                    extraMotion[`screws_${mountId}`]='fixed'
+                }
                 holes.push({diameter: hole * 2, access})
                 features.push({id: `mounts.${mountId}`, model: envelope, z: topMount ? s.plate_z + s.plate : s.floor,
                     height: topMount ? s.height - s.plate_z - s.plate : (role === 'case' ? s.height : targetZ) - s.floor})
@@ -181,6 +228,7 @@ exports.compile = async (config, context, options = {}) => {
             }
 
             for (const ref of s.openings || []) {
+                activeFeature = `${name}.${ref}`
                 const definition = config.components[ref.split('.')[1]]
                 const [low, high] = definition.height.map(v => g.number(v, `${name}.${ref}.height`, context.units))
                 const model = resolve(ref).model
@@ -202,9 +250,19 @@ exports.compile = async (config, context, options = {}) => {
             if (s.chamfer) { top = kernel.chamfer(top, s.chamfer, s.height) }
             const plate = kernel.extrude(plateModel, s.plate, s.plate_z)
             const parts = {bottom, top, plate}
+            if (s.construction === 'midframe') {
+                const split = middleSplit
+                if (split >= s.height - s.wall) { g.fail(`${name}.construction`, 'Increase shell height to fit the middle frame and top cover') }
+                const upper = kernel.extrude(exterior, s.height - split, split)
+                parts.middle = kernel.cut(top, upper)
+                parts.top = kernel.intersect(top, upper)
+                const lip = subtract(g.offset(exterior, -s.wall / 2), g.offset(exterior, -s.wall))
+                parts.middle = kernel.add(parts.middle, kernel.extrude(lip, 1, split))
+                parts.top = kernel.cut(parts.top, kernel.extrude(g.offset(lip, s.seam?.fit || 0.3), 1.3, split))
+            }
             const models = {plate: plateModel}
             const collision = (solid, label) => {
-                for (const [part, shell] of Object.entries({bottom, top})) {
+                for (const [part, shell] of Object.entries(Object.fromEntries(Object.entries(parts).filter(([key]) => key !== 'plate')))) {
                     if (kernel.volume(kernel.intersect(shell, solid)) > g.TOLERANCE) {
                         g.fail(`${name}.${label}`, `Clearance conflict with ${part} shell`, 'clearance')
                     }
@@ -218,10 +276,13 @@ exports.compile = async (config, context, options = {}) => {
             }
             collision(movement(plateModel, s.plate_z, s.plate), 'plate.movement')
             if (pcbModel) {
-                collision(movement(pcbModel, s.pcb_z, s.pcb_thickness), 'pcb.movement')
+                const tolerance=context.boards?.[id]?.tolerances
+                const edge=tolerance?.outline || 0, thickness=tolerance?.thickness || 0
+                collision(movement(edge?g.offset(pcbModel,edge):pcbModel,s.pcb_z-(floating?thickness:0),s.pcb_thickness+thickness),'pcb.movement')
                 extras.pcb = kernel.extrude(pcbModel, s.pcb_thickness, s.pcb_z)
             }
             for (const ref of s.components || []) {
+                activeFeature = `${name}.${ref}`
                 const definition = config.components[ref.split('.')[1]]
                 const [low, high] = definition.height.map(v => g.number(v, `${name}.${ref}.height`, context.units))
                 const model = resolve(ref).model
@@ -229,6 +290,27 @@ exports.compile = async (config, context, options = {}) => {
                 features.push({id: ref, model, z: low, height: high - low})
                 extras[ref.replace('.', '_')] = kernel.extrude(model, high - low, low)
                 extraMotion[ref.replace('.', '_')] = definition.motion
+            }
+
+            const board = context.boards?.[id]
+            for (const component of board?.components || []) {
+                activeFeature = `${name}.board.models.${component.id}`
+                const association=s.board?.models?.[component.id]
+                if (!association?.asset) { continue }
+                const source=options.assets?.[association.asset]
+                if (!source) { g.fail(`${name}.board`, `Missing model asset ${association.asset}`) }
+                const key=`components_board_${id}_${component.id.replace(/[^A-Za-z0-9_]/g,'_')}`
+                if (!extras[key]) { continue }
+                let imported
+                if (/\.(step|stp)$/i.test(association.asset)) { imported=await kernel.import(source) }
+                else {
+                    const metadata=options.assets?.[`__model_${association.asset}.json`]
+                    const mesh=metadata?JSON.parse(metadata).stl:/\.stl$/i.test(association.asset)?source:null
+                    if (!mesh) { g.fail(`${name}.board.models.${component.id}`,'Import this mesh in Components before generating its STEP reference.','missing-asset') }
+                    const bytes=mesh.startsWith('base64:')?Uint8Array.from(atob(mesh.slice(7)),char=>char.charCodeAt(0)):new TextEncoder().encode(mesh)
+                    imported=await kernel.importMesh(bytes)
+                }
+                extras[key]=kernel.placeModel(imported, association, component, s.pcb_z+(component.side === 'top' ? board.thickness : 0))
             }
 
             // Rotate the complete mechanical stack, then trim the bottom to a flat datum.
@@ -247,15 +329,17 @@ exports.compile = async (config, context, options = {}) => {
             const pocketRadius = {
                 bottom: Math.min(tooling.radius(cavity), ...contacts.map(contact => tooling.radius(contact.pocket)), ...hardwarePockets.bottom.map(tooling.radius)),
                 top: Math.min(tooling.radius(cavity), tooling.radius(opening), ...contacts.map(contact => tooling.radius(contact.pocket)), ...hardwarePockets.top.map(tooling.radius)),
+                middle: Math.min(tooling.radius(cavity), ...contacts.map(contact => tooling.radius(contact.pocket))),
                 plate: tooling.radius(platePockets)
             }
             const partReport = {}
+            const explodeOrder={bottom:0,plate:1,middle:2,top:s.construction==='midframe'?3:2}
             const findings = []
             for (const part of Object.keys(parts)) {
                 const output = `${id}_${part}`
                 if (Object.prototype.hasOwnProperty.call(context.cases, output)) { g.fail(name, `Output-name collision: ${output}`) }
                 results[output] = await kernel.export(placed[part], output)
-                partReport[output] = {slices: [], explode: Object.keys(partReport).length * s.height,
+                partReport[output] = {slices: [], explode: explodeOrder[part] * s.height,
                     bounds: results[output].bounds, volume: results[output].volume, role: part}
                 findings.push(...manufacturing.check(`${name}.${part}`, s.manufacturing?.[part], {
                     wall: part === 'plate' ? s.plate : Math.min(s.wall, s.floor),
@@ -268,29 +352,25 @@ exports.compile = async (config, context, options = {}) => {
             }
             for (const part of Object.keys(extras)) {
                 const output = `${id}_${part}`
-                results[output] = {...await kernel.export(placed[part], output), reference: true}
-                partReport[output] = {slices: [], explode: s.height, bounds: results[output].bounds,
+                results[output] = {...await kernel.export(placed[part], output, 'reference'), reference: true}
+                partReport[output] = {slices: [], explode: part.startsWith('screws_')?-s.height:s.height, bounds: results[output].bounds,
                     volume: results[output].volume, role: part, reference: true, motion: extraMotion[part]}
             }
             const assembly = Object.fromEntries(Object.entries(placed).map(([part, shape]) => [`${id}_${part}`, shape]))
-            const suggest = require('./mounts').suggest
-            const suggestionContext = {base, exterior, units: context.units, name, shape,
-                mounts: mountTable, exclusions: [plateVoids], components: [], gasketModels: contacts.map(contact => contact.model), height: s.height}
-            const suggestions = suggest({...s, suggest: {gaskets: {spacing: 40, size: [10, 6]}}}, suggestionContext)
-            suggestions.push(...suggest({...s, suggest: {spacing: 40, inset: 1, post: 2.5, hole: 1, height: seam - s.floor}},
-                {...suggestionContext, base: g.offset(base, s.bezel / 2 + 1),
-                    exclusions: [g.offset(plateModel, s.fit + (floating ? s.gasket.travel_side : 0)),
-                        ...contacts.map(contact => contact.pocket)]}).map(item => ({...item, definition: {...item.definition, role: 'case'}})))
+            const suggestions = [...(report.analysis?.[id]?.suggestions || []), ...(report.analysis?.[id]?.alternatives?.gaskets || [])]
             publish(`${id}_plate`, models.plate, name)
             report.assemblies[id] = {preset: 'enclosure', mounting: s.mounting, parts: partReport,
-                suggestions, mounts: mountTable, placement: {origin, angle: s.typing_angle, lift},
+                suggestions, mounts: mountTable, hardware: Object.fromEntries(Object.entries(mountTable).map(([key, value]) => [key,{thread:value.thread, clearance:(value.clearance || value.hole)*2, receiver:value.hole*2, head:(value.head || 0)*2}])), placement: {origin, angle: s.typing_angle, lift},
                 features: features.map(feature => {
                     const box = m.measure.modelExtents(feature.model)
                     return {...feature, bounds: [[...box.low, feature.z], [...box.high, feature.z + feature.height]]}
-                }), manufacturing: findings,
+                }), manufacturing: findings.map(f=>({...f,sourcePath:f.feature,explanation:f.message,repairs:[{id:'review',label:f.action || 'Review manufacturing settings for this part.',path:f.feature}]})),
                 gasket: floating ? s.gasket : undefined, parameters: s,
                 step: await kernel.assembly(assembly)}
         }
         return results
+    } catch (error) {
+        if (error.diagnostics) { throw error }
+        g.fail(activeFeature, error.message || 'CAD could not combine these features. Inspect their contact faces and clearance, then retry generation.', 'cad')
     } finally { kernel.close() }
 }

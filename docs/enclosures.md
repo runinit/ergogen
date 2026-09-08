@@ -49,7 +49,8 @@ The minimal example uses a ledge; add closing screws before fabrication.
 - `profile` is the named board envelope; `plate_profile` can supply a distinct
   plate with existing cutouts. `cutouts` subtracts additional named regions.
   Regions and components accept `corner_radius` for rounded rectangles at their
-  declared size, including CNC switch cutouts.
+  declared size. For CNC switch openings use `corner_relief` instead: dogbones
+  preserve the nominal rectangle and its retaining edges.
 - `wall`, `floor`, `height`, `bezel` and `fit` define continuous walls and a bezel.
   `opening` optionally supplies the bezel opening profile.
 - `internal_radius` rounds cavity, gasket-pocket and default opening corners.
@@ -68,7 +69,8 @@ The minimal example uses a ledge; add closing screws before fabrication.
 ## Mounting and hardware
 
 `mounting` selects `tray`, `top`, `bottom` or `gasket`. Declare the actual support
-locations under `mounts`. Changing a style does not invent hardware locations.
+locations under `mounts`. The engine retains declared locations. The GUI accepts automatic drafts from
+outline analysis and preserves placements marked `placement.owner: manual`.
 
 ```yaml
 mounts:
@@ -167,3 +169,56 @@ on close, with one active generation and only the latest queued draft retained.
 
 Replicad is MIT. The pinned OpenCascade WASM package is LGPL-2.1-only; PlaneGCS
 is LGPL-2.0-or-later. Their notices and source references ship with the GUI.
+
+
+## Guided analysis API
+
+`ergogen.process(config, {analysis: true, assets})` resolves outlines, imported
+or generated board inventory, and `designs.analysis.<assembly>` without opening
+the CAD kernel. Each plan contains `model`, `exterior`, `bounds`, `edges`,
+`placements`, `suggestions`, `findings` and resolved `parameters`. Findings include
+severity, source path, affected feature, explanation and suggested repairs.
+The normal result retains this analysis alongside existing solids and exports.
+
+Board selection lives under `assemblies.<name>.board`:
+
+```yaml
+board:
+  source: asset # generated selects a pcbs entry; layout makes a mechanical reference
+  name: board.kicad_pcb
+  models:
+    footprint-uuid:
+      asset: models/controller.step
+      path: ${KIPRJMOD}/models/models/controller.step
+      offset: [0, 0, 0]
+      rotate: [0, 0, 0]
+      scale: [1, 1, 1]
+```
+
+Pass asset contents separately. STL bytes use `base64:` encoding; the GUI caches
+converted mesh metadata separately. Association patches affect only the selected
+footprint model. Existing nets, pads and routing retain their original text.
+Accepted `board.holes` append NPTH footprints only after copper/keepout checks.
+Unknown copper graphics prevent accepting a new hole. Layout references have no
+electrical routing; select their `family` explicitly (`mx`, `choc-v1`, `choc-v2`).
+
+`construction: cover` retains the top cover and distinct plate.
+`construction: midframe` adds a separately exported middle frame with a locating
+joint. Supply `manufacturing.middle` for that part. The GUI uses the versioned
+`jlccnc-6061-2026-09` preset; its source data and application defaults are recorded
+in project metadata. Existing designs keep their declared settings.
+
+The 2D mounting editor stores absolute anchors plus a geometric edge reference.
+Changing that edge produces a repairable finding. Redistribute replaces only
+entries owned by `automatic`; manual entries are never discarded to fix a fit
+conflict. Case-closing M3 hardware shares receiver, clearance and head dimensions.
+
+Model envelopes accept unit expressions. Measured `board.keycaps.size` and
+`board.keycaps.height` cover each populated switch; heights use the top of the
+switch plate as their datum. Missing keycaps produce an unresolved-clearance
+warning. Nonuniform STEP scales retain the original asset and use a faceted
+assembly reference with a 0.01 mm meshing tolerance.
+
+Middle frames have clearance bores; case-closing threads belong to the top
+cover. Exploded views place that cover above the plate and middle frame.
+Screws are separate reference solids; threads remain manufacturing metadata.

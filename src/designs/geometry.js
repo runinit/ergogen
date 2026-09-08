@@ -12,7 +12,8 @@ class DesignError extends Error {
     constructor(feature, message, code = 'geometry') {
         super(`${feature}: ${message}`)
         this.name = 'DesignError'
-        this.diagnostics = [{feature, message, code, severity: 'error'}]
+        const action = code === 'dimension' ? 'Enter a finite dimension in the affected setting.' : 'Review the affected feature and its clearance, then generate again.'
+        this.diagnostics = [{feature, sourcePath:feature, message, explanation:message, code, severity: 'error', action, repairs:[{id:'review',label:action,path:feature}]}]
     }
 }
 

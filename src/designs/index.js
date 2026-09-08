@@ -10,6 +10,17 @@ const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key)
 
 exports.parse = async (config, points, outlines, units, options = {}) => {
     a.unexpected(config, 'designs', sections)
+    // Imported outlines also feed the wizard thumbnails before its generated regions resolve.
+    config = {...config,regions:{...config.regions}}
+    outlines = {...outlines}
+    for (const [id,spec] of Object.entries(config.assemblies || {})) {
+        if (spec.board?.source !== 'asset' || !options.assets?.[spec.board.name]) { continue }
+        const imported = require('./board-inventory').read(options.assets[spec.board.name])
+        const ref = `__import_${id}`
+        outlines[ref] = imported.model
+        if (config.regions[`${id}_keys`]) { config.regions[`${id}_keys`] = {outline:ref} }
+        if (config.regions[`${id}_switches`]) { config.regions[`${id}_switches`] = {outline:ref} }
+    }
     const features = {}, resolved = {}, active = new Set(), generated = {}, cases = {}
     const report = {features, diagnostics: [], adjustments: [], assemblies: {}, tolerance: g.TOLERANCE}
     const dim = (value, name) => g.number(value, name, units)
@@ -35,6 +46,19 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
             const corner = g.number(spec.corner_radius || 0, `${name}.corner_radius`, scope)
             if (corner < 0 || corner > Math.min(...size) / 2) { g.fail(name, 'Corner radius must fit the declared width and length') }
             model = m.model.center(corner ? new m.models.RoundRectangle(...size, corner) : new m.models.Rectangle(...size))
+            const relief = g.number(spec.corner_relief || 0, `${name}.corner_relief`, scope)
+            if (relief < 0 || relief > Math.min(...size) / 4 || (relief && corner)) {
+                g.fail(name, 'Corner relief must fit the opening and cannot be combined with rounded corners')
+            }
+            // Dogbones leave the nominal opening and the central retaining edges intact.
+            if (relief) {
+                for (const x of [-1, 1]) {
+                    for (const y of [-1, 1]) {
+                        const center = [x * (size[0] / 2 - relief / Math.SQRT2 + g.TOLERANCE), y * (size[1] / 2 - relief / Math.SQRT2 + g.TOLERANCE)]
+                        model = g.combine(model, {paths: {relief: new m.paths.Circle(center, relief)}})
+                    }
+                }
+            }
         }
         return point.position(model)
     }
@@ -83,7 +107,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         try {
             let model, occupied = {paths: {}}, groups = []
             if (section === 'regions') {
-                a.unexpected(spec, name, ['where', 'asym', 'size', 'corner_radius', 'outline', 'close', 'clearance', 'round', 'connected', 'modifications'])
+                a.unexpected(spec, name, ['where', 'asym', 'size', 'corner_radius', 'corner_relief', 'outline', 'close', 'clearance', 'round', 'connected', 'modifications'])
                 if (spec.outline) {
                     if (!own(outlines, spec.outline)) { g.fail(name, `Missing outline ${spec.outline}`, 'reference') }
                     groups = [g.clone(outlines[spec.outline])]
@@ -172,11 +196,26 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
     for (const section of sections.filter(section => section !== 'assemblies')) {
         for (const id of Object.keys(config[section] || {})) { resolve(`${section}.${id}`) }
     }
+    const boards = options.boardSources ? options.boardSources(generated) : {}
+    config = require('./board-link').attach(config, boards, {resolved, features, units, shape, assets:options.assets})
+    report.boards = boards
     if (Object.keys(config.assemblies || {}).length) {
         const assemblies = require('./assemblies')
         const legacy = Object.fromEntries(Object.entries(config.assemblies).filter(([, spec]) => spec.preset !== 'enclosure'))
         assemblies.compile({...config, assemblies: legacy}, {resolve, locate, shape, publish, units, cases, report, outlines: generated})
     }
-    const solids = await require('./enclosures').compile(config, {resolve, locate, shape, publish, units, cases, report}, options)
+    report.analysis = require('./enclosure-analysis').analyze(config, {resolve, locate, shape, units, boards})
+    for (const [id, board] of Object.entries(boards)) { report.analysis[id]?.findings.push(...board.findings) }
+    if (options.analysis) {
+        return {outlines: generated, cases, report, solids: {}}
+    }
+    const earlyCodes = ['mounting','mounting-conflict','seam','disconnected','edge-reference','component-height']
+    const early = Object.entries(report.analysis).flatMap(([id,plan])=>plan.findings.filter(f=>f.severity==='error'&&(config.assemblies[id].board||earlyCodes.includes(f.code))))
+    if (early.length) { const error=new Error(early.map(f=>f.message).join(' ')); error.diagnostics=early; throw error }
+    for (const board of Object.values(boards)) {
+        const errors=board.findings.filter(f=>f.severity==='error')
+        if (errors.length) { const error = new Error(errors.map(f => f.message).join(' ')); error.diagnostics = errors; throw error }
+    }
+    const solids = await require('./enclosures').compile(config, {resolve, locate, shape, publish, units, cases, report, boards}, options)
     return {outlines: generated, cases, report, solids}
 }

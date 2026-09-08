@@ -1,3 +1,12 @@
+## Guided enclosure analysis
+
+- Analyze board outlines, component inventory and mounting candidates before CAD.
+- Link generated/imported KiCad boards without rewriting electrical data.
+- Preserve explicit placement ownership and flag changed edge references.
+- Add top-cover/middle-frame construction, shared closing hardware and CNC
+  switch corner relief that preserves engagement dimensions.
+- Import model references and retain structured, repairable generation failures.
+
 # 4.0.0 (2022-??-??)
 
 ## :boom: Breaking Changes

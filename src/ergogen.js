@@ -50,11 +50,12 @@ const process = async (raw, options={}, logger=()=>{}) => {
     }
     
     logger('Parsing points...')
-    if (!config.points) {
+    const importedBoard = Object.values(config.designs?.assemblies || {}).some(spec => spec.board?.source === 'asset')
+    if (!config.points && !importedBoard) {
         throw new Error('Input does not contain a points clause!')
     }
-    const points = points_lib.parse(config.points, units)
-    if (!Object.keys(points).length) {
+    const points = config.points ? points_lib.parse(config.points, units) : {}
+    if (!Object.keys(points).length && !importedBoard) {
         throw new Error('Input does not contain any points!')
     }
     if (debug) {
@@ -66,7 +67,8 @@ const process = async (raw, options={}, logger=()=>{}) => {
     const outlines = outlines_lib.parse(config.outlines || {}, points, units)
     let caseConfig = config.cases || {}
     if (config.designs) {
-        const design = await designs_lib.parse(config.designs, points, outlines, units, options)
+        const design = await designs_lib.parse(config.designs, points, outlines, units, {...options,
+            boardSources: generated => require('./designs/board-link').sources(config, {...outlines,...generated}, points, units, options.assets)})
         Object.assign(outlines, design.outlines)
         for (const name of Object.keys(design.cases)) {
             if (Object.prototype.hasOwnProperty.call(caseConfig, name)) {
@@ -104,6 +106,8 @@ const process = async (raw, options={}, logger=()=>{}) => {
         results.pcbs[pcb_name] = pcb_text
         empty = false
     }
+
+    for (const board of Object.values(results.designs?.boards || {})) { results.pcbs[board.name.replace(/\.kicad_pcb$/, '')] = board.source }
 
     if (!debug && empty) {
         logger('Output would be empty, rerunning in debug mode...')

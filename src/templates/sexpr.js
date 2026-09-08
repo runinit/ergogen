@@ -18,12 +18,14 @@ exports.parse = (source, context) => {
         }
         if (token === '(') {
             const node = []
+            node.range = [offset - 1, null]
             stack[stack.length - 1].push(node)
             stack.push(node)
         } else if (token === ')') {
             if (stack.length === 1) {
                 throw new Error(`${context}: unexpected closing parenthesis at ${offset}`)
             }
+            stack[stack.length - 1].range[1] = offset
             stack.pop()
         } else {
             stack[stack.length - 1].push(token)

@@ -38,3 +38,39 @@ describe('Solid topology', function() {
         } finally { kernel.close() }
     })
 })
+
+describe('KiCad model placement', function() {
+    this.timeout(20000)
+    it('matches the clockwise XYZ model rotations exported by KiCad 10', async () => {
+        const assert=require('node:assert/strict'),m=require('makerjs')
+        const kernel=await require('../../src/designs/solid-kernel').open()
+        try {
+            const cube=kernel.extrude(new m.models.Rectangle(1,2),3)
+            const moved=kernel.placeModel(cube,{offset:[1,2,3],rotate:[20,30,40],scale:[1,1,1]},{side:'top',position:[30,-20],rotation:90},1.2)
+            const expected=[[25.0881116386,-19.4202305344,3.6026037345],[28.5566703992,-16.8665378745,7.1363930440]]
+            kernel.bounds(moved).forEach((point,i)=>point.forEach((value,j)=>assert.ok(Math.abs(value-expected[i][j])<0.01)))
+        } finally {kernel.close()}
+    })
+})
+
+it('reimports an STL as a closed STEP solid',async()=>{
+    const assert=require('node:assert/strict'),m=require('makerjs')
+    const kernel=await require('../../src/designs/solid-kernel').open()
+    try {
+        const part=await kernel.export(kernel.extrude(new m.models.Rectangle(4,4),4),'cube')
+        const imported=await kernel.importMesh(part.stl)
+        const result=await kernel.export(imported,'mesh')
+        assert.ok(Math.abs(result.volume-64)<0.001)
+    } finally {kernel.close()}
+})
+
+it('honours existing nonuniform model scales without changing the source asset',async()=>{
+    const kernel=await require('../../src/designs/solid-kernel').open()
+    try {
+        const cube=kernel.extrude(new m.models.Rectangle(1,2),3)
+        const scaled=kernel.placeModel(cube,{scale:[2,3,4]},{side:'top',rotation:0,position:[0,0]},0)
+        kernel.validate(scaled)
+        assert.ok(Math.abs(kernel.volume(scaled)-144)<0.001)
+        assert.ok(Math.abs(kernel.volume(cube)-6)<0.001)
+    } finally {kernel.close()}
+})

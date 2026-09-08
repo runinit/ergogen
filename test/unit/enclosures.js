@@ -181,3 +181,25 @@ describe('Solid enclosures', function() {
 })
 
 module.exports = {fixture}
+
+describe('Guided enclosure construction', function() {
+    this.timeout(120000)
+    it('exports a connected middle frame and separate top cover', async () => {
+        const input=fixture('gasket'), spec=input.designs.assemblies.case
+        spec.bezel=8
+        spec.construction='midframe'
+        const result=await engine.process(input)
+        assert.ok(result.solids.case_middle.volume>0)
+        const parts=result.designs.assemblies.case.parts
+        assert.ok(parts.case_top.explode>parts.case_middle.explode)
+        assert.ok(parts.case_middle.explode>parts.case_plate.explode)
+        assert.match(result.solids.case_middle.step,/MANIFOLD_SOLID_BREP/)
+    })
+    it('cuts a screw clearance bore and head access separately from an M3 receiver', async () => {
+        const input=fixture('tray'), spec=input.designs.assemblies.case
+        spec.bezel=12
+        spec.mounts={closure:{role:'case',anchor:{shift:[38,0]},post:4,hole:1.25,clearance:1.7,head:3.1,head_depth:3.3,depth:6,access:'bottom',hardware:'tapped',thread:'M3x0.5'}}
+        const result=await engine.process(input)
+        assert.ok(result.designs.assemblies.case.hardware.closure.clearance===3.4)
+    })
+})

@@ -72,6 +72,14 @@ exports.open = async (options = {}) => {
             }
         } finally { check.delete() }
     }
+    const meshSolid = triangles => {
+        const faces=triangles.map(points=>keep(r.makePolygon(points)))
+        const welded=keep(r.weldShellsAndFaces(faces,true))
+        const shells=[...r.iterTopo(welded.wrapped,'shell')].map(shell=>keep(r.cast(shell)))
+        if (!shells.length) { g.fail('designs.model','Mesh must contain a closed shell for STEP export.','asset') }
+        const solids=shells.map(shell=>keep(r.makeSolid([shell])))
+        return solids.length===1?solids[0]:keep(r.makeCompound(solids))
+    }
     return {
         extrude,
         add: (left, right) => keep(left.fuse(right)),
@@ -84,11 +92,11 @@ exports.open = async (options = {}) => {
         volume: shape => Math.abs(r.measureVolume(shape)),
         bounds,
         validate,
-        export: async (shape, name) => {
+        export: async (shape, name, role = 'manufactured') => {
             validate(shape)
             const solids = shape.solids
             try {
-                if (solids.length !== 1) { g.fail(`designs.solid.${name}`, 'A manufactured part must contain one connected solid') }
+                if (role === 'manufactured' && solids.length !== 1) { g.fail(`designs.solid.${name}`, 'A manufactured part must contain one connected solid') }
             } finally { solids.forEach(solid => solid.delete()) }
             return {name, volume: Math.abs(r.measureVolume(shape)), bounds: bounds(shape),
                 step: await shape.blobSTEP().text(),
@@ -96,6 +104,30 @@ exports.open = async (options = {}) => {
         },
         assembly: async parts => (await r.exportSTEP(Object.entries(parts).map(([name, shape]) => ({name, shape})), {unit: 'MM', modelUnit: 'MM'})).text(),
         import: async step => keep(await r.importSTEP(new Blob([step]))),
+        importMesh: async bytes => meshSolid(require('./mesh-import').triangles(bytes)),
+        placeModel: (input, transform, component, z) => {
+            const scales = transform.scale || [1,1,1]
+            if (scales.length !== 3 || scales.some(v=>!Number.isFinite(v) || v<=0)) { g.fail('designs.components','Model scales must contain three positive numbers.','asset') }
+            let result
+            if (scales.every(v => v === scales[0])) { result = keep(input.clone().scale(scales[0], [0,0,0])) }
+            else {
+                // Preserve the original STEP asset; only its assembly reference is faceted for an affine scale.
+                const mesh=input.mesh({tolerance:MESH_TOLERANCE/Math.max(...scales)})
+                const triangles=[]
+                for (let i=0;i<mesh.triangles.length;i+=3) {
+                    triangles.push(mesh.triangles.slice(i,i+3).map(index=>mesh.vertices.slice(index*3,index*3+3).map((v,axis)=>v*scales[axis])))
+                }
+                result=meshSolid(triangles)
+            }
+            for (let axis=0;axis<3;axis++) {
+                const direction=[0,0,0]; direction[axis]=1
+                result=keep(result.rotate(-(transform.rotate?.[axis] || 0),[0,0,0],direction))
+            }
+            result=keep(result.translate(transform.offset || [0,0,0]))
+            if (component.side === 'bottom') { result=keep(result.rotate(180,[0,0,0],[1,0,0])) }
+            result=keep(result.rotate(component.rotation,[0,0,0],[0,0,1]))
+            return keep(result.translate([component.position[0],component.position[1],z]))
+        },
         retained: () => owned.size,
         close: () => {
             for (const value of [...owned].reverse()) {
