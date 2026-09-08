@@ -41,6 +41,17 @@ describe('Solid enclosures', function() {
         const result = await engine.process(input)
         assert.ok(result.solids.case_bottom.volume > 0)
     })
+    it('rejects gasket tabs that fill switch cutouts', async () => {
+        const input = fixture('gasket')
+        input.designs.regions.switch.size = [56, 14]
+        await assert.rejects(engine.process(input), /gaskets.left.*cutout/)
+    })
+    it('rejects a plate mount inside a switch cutout', async () => {
+        const input = fixture('top')
+        input.designs.regions.switch.size = [56, 14]
+        input.designs.assemblies.case.mounts = {key: {role: 'plate', anchor: {shift: [30, 0]}, post: 3, hole: 1}}
+        await assert.rejects(engine.process(input), /mounts.key.*cutout/)
+    })
     it('rejects insufficient gasket movement clearance', async () => {
         const input = fixture('gasket')
         input.designs.assemblies.case.gasket.travel_down = 8
@@ -92,6 +103,27 @@ describe('Solid enclosures', function() {
         assert.equal(result.designs.assemblies.case.mounts.right.role, 'plate')
         assert.ok(result.solids.case_top.volume > 0)
         assert.ok(result.solids.case_plate.volume > (60 * 40 - 14 * 14) * 1.5)
+    })
+    it('opens a top-inserted hardware pocket on the declared face', async () => {
+        const input = fixture('top')
+        input.designs.assemblies.case.mounts = {right: {
+            role: 'plate', anchor: {shift: [30, 0]}, post: 3, hole: 1,
+            hardware: 'insert', pocket: 1.5, pocket_depth: 2, min_wall: 1, depth: 4, access: 'top'
+        }}
+        const result = await engine.process(input)
+        const kernel = await require('../../src/designs/solid-kernel').open()
+        try {
+            const top = await kernel.import(result.solids.case_top.step)
+            const probe = kernel.extrude({paths: {circle: new (require('makerjs').paths.Circle)([31.25, 0], 0.1)}}, 0.5, 17)
+            assert.ok(kernel.volume(kernel.intersect(top, probe)) < 0.000001)
+        } finally { kernel.close() }
+    })
+    it('extends the floor to the datum when front height increases', async () => {
+        const input = fixture()
+        input.designs.assemblies.case.front_height = 24
+        const result = await engine.process(input)
+        assert.ok(Math.abs(result.solids.case_bottom.bounds[0][2]) < 0.000001)
+        assert.ok(Math.abs(result.solids.case_top.bounds[1][2] - 24) < 0.000001)
     })
     it('keeps the bottom flat while tilting the mechanical stack', async () => {
         const input = fixture()
