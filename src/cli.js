@@ -202,6 +202,16 @@ for (const [name, pcb] of Object.entries(results.pcbs)) {
     single(pcb, `pcbs/${name}.kicad_pcb`)
 }
 
+for (const [name, solid] of Object.entries(results.solids || {})) {
+    single(solid.step, `solids/${name}.step`)
+    single(solid.stl, `solids/${name}.stl`)
+}
+for (const [name, assembly] of Object.entries(results.designs?.assemblies || {})) {
+    if (!assembly.step) { continue }
+    single(assembly.step, `solids/${name}_assembly.step`)
+    single({findings: assembly.manufacturing}, `solids/${name}_manufacturing.yaml`)
+}
+
 // goodbye
 
 console.log('Done.')

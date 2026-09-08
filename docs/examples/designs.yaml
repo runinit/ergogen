@@ -1,0 +1,49 @@
+meta:
+  engine: 5.0.0
+units:
+  pitch: 19
+points:
+  zones:
+    keys:
+      key: {spread: pitch}
+      columns: {left: {}, right: {}}
+      rows: {home: {}, top: {}}
+designs:
+  regions:
+    keys: {where: true, close: 2}
+    switches: {where: true, size: 14}
+  boundaries:
+    body:
+      from: regions.keys
+      clearance: 3
+  sketches:
+    opening:
+      points:
+        center: {at: [9.5, 9.5], fixed: true}
+      geometry:
+        hole: {type: circle, center: center, radius: 2}
+      constraints:
+        radius: {type: radius, geometry: hole, value: 2}
+  profiles:
+    pcb: {from: boundaries.body}
+    plate: {from: boundaries.body, cutouts: [regions.switches, sketches.opening]}
+  assemblies:
+    plate:
+      preset: plate
+      profile: profiles.plate
+      plate: 1.5
+    tray:
+      preset: tray
+      profile: profiles.pcb
+      wall: 3
+      floor: 2
+      height: 10
+      fit: 0.3
+      lid: 2
+      mounts:
+        center:
+          anchor: {shift: [9.5, 9.5]}
+          hole: 1.2
+          post: 3
+          height: 5
+      suggest: {spacing: 25, inset: 5, post: 2.5}

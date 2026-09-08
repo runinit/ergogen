@@ -1,0 +1,487 @@
+meta:
+  engine: 5.0.0
+  name: BHK enclosure
+presets:
+  choc_v1:
+    kx: cx
+    ky: cy
+    ks: 18.5
+    kp: 17.5
+    kcow: 13.8
+    kcoh: 13.8
+    keycw: 17.5
+    keych: 16.5
+    diode_shift_x: 5.7
+    diode_rotation: 180
+    switch_rotation: 180
+    led_shift_y: -5
+    choc_v1_support: true
+  choc_v2:
+    kx: u
+    ky: u
+    ks: 19
+    kp: 19
+    kcow: 14
+    kcoh: 14
+    keycw: 18
+    keych: 18
+    diode_shift_x: 5.7
+    diode_rotation: 180
+    switch_rotation: 180
+    led_shift_y: -5
+    choc_v1_support: false
+  mx:
+    kx: u
+    ky: u
+    ks: 19
+    kp: 19
+    kcow: 14
+    kcoh: 14
+    keycw: 18
+    keych: 18
+    diode_shift_x: 8
+    diode_shift_y: -6.3
+    diode_rotation: 90
+    switch_rotation: 180
+    led_shift_y: 5
+    choc_v1_support: false
+units:
+  $extends: presets.mx
+  mcu_x: 18
+  mcu_y: 33
+  display_x: 14
+  display_y: 36
+  screw_radius: 1.1
+  spacer_radius: 2.05
+  fillet_radius: 1
+  gasket_width: 4
+  gasket_length_lg: 55
+  gasket_length_md: 40
+  gasket_length_sm: 25
+  gasket_length_1kx: 10
+  thumb_splay: -15
+  electronics_shift: 1.6
+points:
+  key.tags:
+    - key
+  zones:
+    matrix:
+      anchor:
+        shift:
+          - 150
+          - -150
+      columns:
+        c1:
+          key:
+            width: 1.25 * kx
+            tags:
+              - key_1_25u
+            column_net: c1
+          rows:
+            r1:
+              led_prev: LED_6
+              led_next: LED_7
+            r2:
+              led_prev: LED_7
+              led_next: LED_8
+            r3:
+              led_prev: LED_19
+              led_next: LED_20
+            r4:
+              led_prev: LED_20
+              led_next: LED_21
+            r5.skip: true
+        c2:
+          key:
+            spread: 1.125 * kx
+            column_net: c2
+          rows:
+            r1:
+              led_prev: LED_5
+              led_next: LED_6
+            r2:
+              led_prev: LED_8
+              led_next: LED_9
+            r3:
+              led_prev: LED_18
+              led_next: LED_19
+            r4:
+              led_prev: LED_21
+              led_next: LED_22
+            r5:
+              skip: true
+              led_prev: LED_27
+              led_next: LED_28
+        c3:
+          key:
+            stagger: ky/4
+            column_net: c3
+          rows:
+            r1:
+              led_prev: LED_4
+              led_next: LED_5
+            r2:
+              led_prev: LED_9
+              led_next: LED_10
+            r3:
+              led_prev: LED_17
+              led_next: LED_18
+            r4:
+              led_prev: LED_22
+              led_next: LED_23
+            r5:
+              led_prev: LED_32
+              led_next: LED_END
+        c4:
+          key:
+            stagger: ky/8
+            column_net: c4
+          rows:
+            r1:
+              led_prev: LED_3
+              led_next: LED_4
+            r2:
+              led_prev: LED_10
+              led_next: LED_11
+            r3:
+              led_prev: LED_16
+              led_next: LED_17
+            r4:
+              led_prev: LED_23
+              led_next: LED_24
+            r5:
+              led_prev: LED_31
+              led_next: LED_32
+        c5:
+          key:
+            stagger: '-ky/8'
+            column_net: c5
+          rows:
+            r1:
+              led_prev: LED_2
+              led_next: LED_3
+            r2:
+              led_prev: LED_11
+              led_next: LED_12
+            r3:
+              led_prev: LED_15
+              led_next: LED_16
+            r4:
+              led_prev: LED_24
+              led_next: LED_25
+            r5.skip: true
+        c6:
+          key:
+            stagger: '-ky/4'
+            column_net: c6
+          rows:
+            r1:
+              led_prev: LED_1
+              led_next: LED_2
+            r2:
+              led_prev: LED_12
+              led_next: LED_13
+            r3:
+              led_prev: LED_14
+              led_next: LED_15
+            r4:
+              led_prev: LED_25
+              led_next: LED_26
+            r5.skip: true
+        c7:
+          key:
+            stagger: '-ky/2'
+            column_net: c7
+          rows:
+            r1:
+              led_prev: DOUT
+              led_next: LED_1
+            r2:
+              width: 1.5 * kx
+              tags:
+                - key_1_5u
+              led_prev: LED_13
+              led_next: LED_14
+              adjust:
+                shift:
+                  - 0
+                  - '-0.25 * kx'
+            r5.skip: true
+            r4.skip: true
+            r3.skip: true
+      rows:
+        r5:
+          row_net: r5
+        r4:
+          row_net: r4
+        r3:
+          row_net: r3
+        r2:
+          row_net: r2
+        r1:
+          row_net: r1
+    thumbfan:
+      anchor:
+        - ref: matrix_c5_r4
+          shift:
+            - .5 * kx
+            - '-1.250 * ky'
+      columns:
+        c1:
+          key:
+            width: 1.25 * kx
+            splay: thumb_splay
+            tags:
+              - key_1_25u
+          rows:
+            r2:
+              led_prev: LED_30
+              led_next: LED_31
+              column_net: c5
+              row_net: r5
+            r1.skip: true
+        c2:
+          key:
+            splay: thumb_splay
+            stagger: '-ky/4'
+            spread: 1.2 * kx
+          rows:
+            r2:
+              led_prev: LED_29
+              led_next: LED_30
+              column_net: c7
+              row_net: r4
+            r1:
+              width: 1.5 * kx
+              tags:
+                - key_1_5u
+              led_prev: LED_26
+              led_next: LED_27
+              column_net: c6
+              row_net: r5
+              adjust:
+                shift:
+                  - 0
+                  - 0.25 * kx
+        c3:
+          rows:
+            r2:
+              led_prev: LED_28
+              led_next: LED_29
+              column_net: c8
+              row_net: r4
+            r1:
+              width: 1.5 * kx
+              tags:
+                - key_1_5u
+              led_prev: LED_27
+              led_next: LED_28
+              column_net: c8
+              row_net: r5
+              adjust:
+                shift:
+                  - 0
+                  - 0.25 * kx
+      rows:
+        r2: null
+        r1: null
+    mcu:
+      key.tags:
+        - helper
+      anchor:
+        - ref: matrix_c6_r1
+          shift:
+            - 1.5 * kx + mcu_x/2 + electronics_shift
+            - ky/2 - mcu_y/2
+    display:
+      key.tags:
+        - helper
+      anchor:
+        - ref: mcu
+          shift:
+            - 0
+            - -3.5
+designs:
+  regions:
+    matrix:
+      where: /^matrix/
+      close: 2
+    thumbs:
+      where: /^thumbfan/
+      close: 3
+    electronics:
+      where: mcu
+      size:
+        - mcu_x
+        - mcu_y
+    switches:
+      where: /^(matrix|thumbfan)/
+      size:
+        - kcow
+        - kcoh
+  boundaries:
+    board:
+      from:
+        - regions.matrix
+        - regions.thumbs
+        - regions.electronics
+      clearance: 2
+      bridges:
+        thumbs:
+          from:
+            ref: matrix_c5_r4
+          to:
+            ref: thumbfan_c2_r2
+          width: 14
+        electronics:
+          from:
+            ref: matrix_c6_r2
+          to:
+            ref: mcu
+          width: 14
+  profiles:
+    pcb:
+      from: boundaries.board
+    plate:
+      from: boundaries.board
+      cutouts:
+        - regions.switches
+  assemblies:
+    bhk:
+      preset: enclosure
+      profile: profiles.pcb
+      plate_profile: profiles.plate
+      mounting: gasket
+      wall: 3
+      floor: 2
+      height: 24
+      plate: 1.5
+      plate_z: 13
+      bezel: 8
+      fit: 0.3
+      manufacturing:
+        bottom:
+          process: fdm
+          nozzle: 0.4
+          layer: 0.2
+          min_wall: 1.2
+          orientation: interior-up
+          supports: allowed
+          material: Measured filament profile
+        top:
+          process: fdm
+          nozzle: 0.4
+          layer: 0.2
+          min_wall: 1.2
+          orientation: interior-up
+          supports: allowed
+          material: Measured filament profile
+        plate:
+          process: fdm
+          nozzle: 0.4
+          layer: 0.2
+          min_wall: 1.2
+          orientation: interior-up
+          supports: allowed
+          material: Measured filament profile
+      pcb_profile: profiles.pcb
+      gaskets:
+        gasket_1:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - -70.98203154999999
+              - -21.920774750000007
+            rotate: 0
+          size: &ref_0
+            - 10
+            - 6
+        gasket_2:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - -50.10703154999999
+              - -21.920774750000007
+            rotate: 0
+          size: *ref_0
+        gasket_3:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - -41.60703154999999
+              - -28.045774750000007
+            rotate: -90
+          size: *ref_0
+        gasket_4:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - -30.607031549999988
+              - -36.17077475000001
+            rotate: 0
+          size: *ref_0
+      mounts:
+        mount_1:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - -82.85703154999999
+              - -25.920774750000007
+            rotate: 0
+          hole: 1
+          post: 2.5
+          height: 11
+          role: case
+          hardware: insert
+          pocket: 1.5
+          pocket_depth: 3
+          min_wall: 1
+          depth: 5
+        mount_3:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - -14.791434552489392
+              - -37.79577475000001
+            rotate: 0
+          hole: 1
+          post: 2.5
+          height: 11
+          role: case
+          hardware: insert
+          pocket: 1.5
+          pocket_depth: 3
+          min_wall: 1
+          depth: 5
+        mount_4:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - 22.06718515000003
+              - -48.69847785000003
+            rotate: 0
+          hole: 1
+          post: 2.5
+          height: 11
+          role: case
+          hardware: insert
+          pocket: 1.5
+          pocket_depth: 3
+          min_wall: 1
+          depth: 5
+        mount_5:
+          anchor:
+            feature: profiles.pcb
+            shift:
+              - 56.91071974999994
+              - -68.18124064999999
+            rotate: 0
+          hole: 1
+          post: 2.5
+          height: 11
+          role: case
+          hardware: insert
+          pocket: 1.5
+          pocket_depth: 3
+          min_wall: 1
+          depth: 5

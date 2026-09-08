@@ -1,8 +1,8 @@
 {
     "name": "@runinit/ergogen",
-    "version": "5.0.0",
+    "version": "5.1.0-develop",
     "description": "Ergonomic keyboard layout generator",
-    "author": "B\u00e1n D\u00e9nes <mr@zealot.hu>",
+    "author": "Bán Dénes <mr@zealot.hu>",
     "license": "MIT",
     "homepage": "https://ergogen.xyz",
     "repository": "github:runinit/ergogen",
@@ -17,6 +17,7 @@
         "coverage": "nyc --reporter=html --reporter=text npm test"
     },
     "dependencies": {
+        "@salusoft89/planegcs": "1.2.0",
         "fs-extra": "^11.3.2",
         "hull": "github:andriiheonia/hull#5847b0a4fa23f8e5aa3c37a8e6d7b8cf58f24082",
         "js-yaml": "^3.14.1",
@@ -24,6 +25,8 @@
         "kle-serial": "github:ergogen/kle-serial#61f29f317d87bbfed0b0b7e646e1b91d4384ac02",
         "makerjs": "^0.18.1",
         "mathjs": "^15.0.0",
+        "replicad": "1.1.0",
+        "replicad-opencascadejs": "1.1.0",
         "yargs": "^17.7.2"
     },
     "devDependencies": {

@@ -5,6 +5,7 @@ const units_lib = require('./units')
 const points_lib = require('./points')
 const outlines_lib = require('./outlines')
 const cases_lib = require('./cases')
+const designs_lib = require('./designs')
 const pcbs_lib = require('./pcbs')
 
 const version = require('../package.json').version
@@ -63,6 +64,22 @@ const process = async (raw, options={}, logger=()=>{}) => {
 
     logger('Generating outlines...')
     const outlines = outlines_lib.parse(config.outlines || {}, points, units)
+    let caseConfig = config.cases || {}
+    if (config.designs) {
+        const design = await designs_lib.parse(config.designs, points, outlines, units, options)
+        Object.assign(outlines, design.outlines)
+        for (const name of Object.keys(design.cases)) {
+            if (Object.prototype.hasOwnProperty.call(caseConfig, name)) {
+                throw new Error(`designs.assemblies: Output-name collision: ${name}`)
+            }
+        }
+        caseConfig = {...caseConfig, ...design.cases}
+        results.designs = design.report
+        if (Object.keys(design.solids).length) {
+            results.solids = design.solids
+            empty = false
+        }
+    }
     results.outlines = {}
     for (const [name, outline] of Object.entries(outlines)) {
         if (!debug && name.startsWith('_')) continue
@@ -71,7 +88,7 @@ const process = async (raw, options={}, logger=()=>{}) => {
     }
 
     logger('Modeling cases...')
-    const cases = cases_lib.parse(config.cases || {}, outlines, units)
+    const cases = cases_lib.parse(caseConfig, outlines, units)
     results.cases = {}
     for (const [case_name, case_script] of Object.entries(cases)) {
         if (!debug && case_name.startsWith('_')) continue
