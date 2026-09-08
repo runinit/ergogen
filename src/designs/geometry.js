@@ -4,6 +4,8 @@ const a = require('../assert')
 
 const TOLERANCE = 0.01 // Millimetres; also the maximum Bézier chord error.
 const EPSILON = 0.000001
+const MAX_OFFSET_STEPS = 1000
+const REPAIR_OFFSET_STEP = TOLERANCE * 10
 const Joint = {Round: 0, Pointed: 1}
 
 class DesignError extends Error {
@@ -73,9 +75,18 @@ const offset = (model, distance, joints = Joint.Round) => {
     const radii = paths(model).filter(path => path.type === 'arc' && path.radius > EPSILON).map(path => path.radius)
     // Retry failed large arc offsets in steps below the original corner radius.
     const steps = radii.length ? Math.max(2, Math.ceil(distance / Math.min(...radii) * 2)) : 2
-    if (steps > 1000) { fail('designs', 'Offset exceeds the analytic subdivision limit') }
+    if (steps > MAX_OFFSET_STEPS) { fail('designs', 'Offset exceeds the analytic subdivision limit') }
     for (let step = 0; step < steps; step++) {
         result = m.model.outline(result, distance / steps, joints, false, {farPoint: u.farPoint})
+    }
+    if (!valid(result)) {
+        // Shallow notches between neighboring keys need smaller analytic steps.
+        const repairs = Math.ceil(distance / REPAIR_OFFSET_STEP)
+        if (repairs > MAX_OFFSET_STEPS) { fail('designs', 'Offset exceeds the analytic subdivision limit') }
+        result = clone(model)
+        for (let step = 0; step < repairs; step++) {
+            result = m.model.outline(result, distance / repairs, joints, false, {farPoint: u.farPoint})
+        }
     }
     if (!valid(result)) { fail('designs', 'Offset failed to preserve the profile extent') }
     return result
@@ -149,7 +160,18 @@ const close = (model, radius) => {
     }
     fail('designs', 'Gap closing failed to preserve closed occupied geometry')
 }
-const round = (model, radius) => radius ? offset(offset(model, -radius), radius) : clone(model)
+const round = (model, radius) => {
+    if (!radius) { return clone(model) }
+    // Avoid exact arc collapse during erosion, within the export tolerance.
+    for (const candidate of [radius, radius - TOLERANCE / 10]) {
+        if (candidate <= 0) { continue }
+        const inset = offset(model, -candidate)
+        if (empty(inset)) { continue }
+        const rounded = offset(inset, candidate)
+        if (!empty(rounded)) { return rounded }
+    }
+    fail('designs', 'Rounding removes the complete profile; reduce its radius')
+}
 const describe = (model, source) => ({
     source, model: clone(model), bounds: m.measure.modelExtents(model), contours: chains(model).length
 })

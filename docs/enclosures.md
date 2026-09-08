@@ -50,7 +50,8 @@ The minimal example uses a ledge; add closing screws before fabrication.
   plate with existing cutouts. `cutouts` subtracts additional named regions.
 - `wall`, `floor`, `height`, `bezel` and `fit` define continuous walls and a bezel.
   `opening` optionally supplies the bezel opening profile.
-- `internal_radius` rounds cavity and default opening corners. The report measures
+- `internal_radius` rounds cavity, gasket-pocket and default opening corners.
+  Fit values are minimum clearances; larger tooling radii can enlarge pockets. The report measures
   resulting pocket boundaries; this setting does not certify arbitrary cutouts.
 - `plate_z`, `pcb_z` and `pcb_thickness` describe the unrotated stack.
   Set `pcb_profile` to show and check the PCB envelope.

@@ -49,6 +49,7 @@ exports.compile = async (config, context, options = {}) => {
             }
             const contacts = []
             const extras = {}, extraMotion = {}
+            const hardwarePockets = {bottom: [], top: []}
             const holes = []
             const features = []
 
@@ -59,7 +60,8 @@ exports.compile = async (config, context, options = {}) => {
                     const tab = shape(definition, path)
                     if (!intersects(tab, base)) { g.fail(path, 'Gasket tab must overlap the plate') }
                     const sleeveMargin = s.gasket.kind === 'sleeves' ? s.gasket.thickness : 0
-                    const pocket = g.offset(tab, sleeveMargin + s.gasket.fit + s.gasket.travel_side)
+                    const pocketClearance = Math.max(sleeveMargin + s.gasket.fit + s.gasket.travel_side, internalRadius)
+                    const pocket = g.round(g.offset(tab, pocketClearance), internalRadius)
                     g.requireContains(g.offset(exterior, -s.wall), pocket, path)
                     plateModel = g.combine(plateModel, tab)
                     const low = s.plate_z - s.gasket.compressed
@@ -155,6 +157,7 @@ exports.compile = async (config, context, options = {}) => {
                         }
                         const pocketModel = mount.hardware === 'nut'
                             ? m.model.moveRelative(new m.models.Polygon(6, circumradius), p) : circle(p, pocketRadius)
+                        hardwarePockets[topMount ? 'top' : 'bottom'].push(pocketModel)
                         const pocketZ = topMount ? s.plate_z + s.plate : access === 'top' ? targetZ - pocketDepth : 0
                         const pocket = kernel.extrude(pocketModel, pocketDepth, pocketZ)
                         if (topMount) { top = kernel.cut(top, pocket) }
@@ -227,8 +230,8 @@ exports.compile = async (config, context, options = {}) => {
             }
             const platePockets = {models: Object.fromEntries(g.chains(plateModel).flatMap(chain => chain.contains || []).map((chain, index) => [index, m.chain.toNewModel(chain)]))}
             const pocketRadius = {
-                bottom: Math.min(tooling.radius(cavity), ...contacts.map(contact => tooling.radius(contact.pocket))),
-                top: Math.min(tooling.radius(cavity), tooling.radius(opening), ...contacts.map(contact => tooling.radius(contact.pocket))),
+                bottom: Math.min(tooling.radius(cavity), ...contacts.map(contact => tooling.radius(contact.pocket)), ...hardwarePockets.bottom.map(tooling.radius)),
+                top: Math.min(tooling.radius(cavity), tooling.radius(opening), ...contacts.map(contact => tooling.radius(contact.pocket)), ...hardwarePockets.top.map(tooling.radius)),
                 plate: tooling.radius(platePockets)
             }
             const partReport = {}

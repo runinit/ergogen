@@ -32,10 +32,27 @@ describe('Solid enclosures', function() {
             assert.ok(result.outlines.case_plate.dxf)
         })
     }
+    it('offsets a close-spaced four-key layout into continuous walls', async () => {
+        const input = fixture()
+        input.points = {zones: {keys: {columns: {left: {}, right: {}}, rows: {home: {}, top: {}}}}}
+        input.designs.regions.board = {where: true, close: 2}
+        input.designs.profiles.board.clearance = 2
+        input.designs.assemblies.case.bezel = 8
+        const result = await engine.process(input)
+        assert.ok(result.solids.case_bottom.volume > 0)
+    })
     it('rejects insufficient gasket movement clearance', async () => {
         const input = fixture('gasket')
         input.designs.assemblies.case.gasket.travel_down = 8
         await assert.rejects(engine.process(input), /gasket.*travel|movement|clearance/i)
+    })
+    it('cuts CNC gasket pockets with the requested internal radius', async () => {
+        const input = fixture('gasket'), spec = input.designs.assemblies.case
+        spec.bezel = 8
+        spec.internal_radius = 2
+        spec.manufacturing = {bottom: {process: 'cnc', cutter: 3, reach: 30, min_wall: 2, setups: ['top', 'bottom']}}
+        const result = await engine.process(input)
+        assert.ok(!result.designs.assemblies.case.manufacturing.some(issue => issue.feature.endsWith('.bottom') && issue.code === 'radius'))
     })
     it('reports machining limits without claiming unconfigured features passed', async () => {
         const input = fixture()
