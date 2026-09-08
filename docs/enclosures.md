@@ -48,6 +48,8 @@ The minimal example uses a ledge; add closing screws before fabrication.
 
 - `profile` is the named board envelope; `plate_profile` can supply a distinct
   plate with existing cutouts. `cutouts` subtracts additional named regions.
+  Regions and components accept `corner_radius` for rounded rectangles at their
+  declared size, including CNC switch cutouts.
 - `wall`, `floor`, `height`, `bezel` and `fit` define continuous walls and a bezel.
   `opening` optionally supplies the bezel opening profile.
 - `internal_radius` rounds cavity, gasket-pocket and default opening corners.

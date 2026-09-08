@@ -57,6 +57,15 @@ describe('Solid enclosures', function() {
         input.designs.assemblies.case.gasket.travel_down = 8
         await assert.rejects(engine.process(input), /gasket.*travel|movement|clearance/i)
     })
+    it('machines rounded switch cutouts without changing their nominal size', async () => {
+        const input = fixture()
+        input.designs.regions.switch.corner_radius = 1
+        input.designs.assemblies.case.manufacturing = {plate: {process: 'cnc', cutter: 2, reach: 10, min_wall: 1, setups: ['top']}}
+        const result = await engine.process(input)
+        const expected = (60 * 40 - (14 * 14 - (4 - Math.PI))) * 1.5
+        assert.ok(Math.abs(result.solids.case_plate.volume - expected) < 0.001)
+        assert.ok(!result.designs.assemblies.case.manufacturing.some(issue => issue.feature.endsWith('.plate') && issue.code === 'radius'))
+    })
     it('cuts CNC gasket pockets with the requested internal radius', async () => {
         const input = fixture('gasket'), spec = input.designs.assemblies.case
         spec.bezel = 8

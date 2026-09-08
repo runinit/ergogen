@@ -32,7 +32,9 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
             const scope = {...units, ...point.meta}
             const size = a.wh(spec.size || [point.meta.width, point.meta.height], `${name}.size`)(scope)
             size.forEach(value => g.positive(value, `${name}.size`))
-            model = m.model.center(new m.models.Rectangle(...size))
+            const corner = g.number(spec.corner_radius || 0, `${name}.corner_radius`, scope)
+            if (corner < 0 || corner > Math.min(...size) / 2) { g.fail(name, 'Corner radius must fit the declared width and length') }
+            model = m.model.center(corner ? new m.models.RoundRectangle(...size, corner) : new m.models.Rectangle(...size))
         }
         return point.position(model)
     }
@@ -81,7 +83,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         try {
             let model, occupied = {paths: {}}, groups = []
             if (section === 'regions') {
-                a.unexpected(spec, name, ['where', 'asym', 'size', 'outline', 'close', 'clearance', 'round', 'connected', 'modifications'])
+                a.unexpected(spec, name, ['where', 'asym', 'size', 'corner_radius', 'outline', 'close', 'clearance', 'round', 'connected', 'modifications'])
                 if (spec.outline) {
                     if (!own(outlines, spec.outline)) { g.fail(name, `Missing outline ${spec.outline}`, 'reference') }
                     groups = [g.clone(outlines[spec.outline])]
@@ -137,7 +139,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
                 groups = g.partition(model)
                 if (section === 'profiles') { publish(id, model, name) }
             } else if (section === 'components') {
-                a.unexpected(spec, name, ['anchor', 'size', 'radius', 'height', 'clearance', 'motion'])
+                a.unexpected(spec, name, ['anchor', 'size', 'radius', 'corner_radius', 'height', 'clearance', 'motion'])
                 model = shape(spec, name)
                 const height = a.numarr(spec.height, `${name}.height`, 2)(units)
                 if (height[0] >= height[1]) { g.fail(name, 'Height range must increase') }
