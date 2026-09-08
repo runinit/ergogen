@@ -41,6 +41,22 @@ describe('Solid enclosures', function() {
         const result = await engine.process(input)
         assert.ok(result.solids.case_bottom.volume > 0)
     })
+    it('machines a four-key case without treating outward corners as pocket limits', async () => {
+        const input = fixture()
+        input.points = {zones: {keys: {columns: {left: {}, right: {}}, rows: {home: {}, top: {}}}}}
+        input.designs.regions.board = {where: true, close: 2}
+        input.designs.profiles.board.clearance = 2
+        input.designs.regions.switch.corner_radius = 1
+        const spec = input.designs.assemblies.case
+        spec.bezel = 8
+        spec.internal_radius = 2
+        spec.manufacturing = Object.fromEntries(['bottom', 'top', 'plate'].map(part => [part, {
+            process: 'cnc', cutter: part === 'plate' ? 2 : 3, reach: 30, min_wall: 1,
+            setups: ['top', 'bottom']
+        }]))
+        const result = await engine.process(input)
+        assert.deepEqual(result.designs.assemblies.case.manufacturing.filter(issue => issue.severity === 'error'), [])
+    })
     it('rejects gasket tabs that fill switch cutouts', async () => {
         const input = fixture('gasket')
         input.designs.regions.switch.size = [56, 14]
