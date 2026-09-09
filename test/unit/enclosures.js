@@ -72,6 +72,52 @@ describe('Solid enclosures', function() {
         const mixed = await engine.process(input)
         assert.ok(Math.abs(mixed.solids.case_top.volume - original.solids.case_top.volume) < 0.001)
     })
+    it('relieves holes already defined in a plate profile', async () => {
+        const input = fixture()
+        const spec = input.designs.assemblies.case
+        spec.manufacturing = {plate: {process: 'cnc', cutter: 3, reach: 30, min_wall: 1, setups: ['top']}}
+        const direct = await engine.process(input)
+        input.designs.profiles.plate = {from: 'regions.board', cutouts: ['regions.switch']}
+        spec.plate_profile = 'profiles.plate'
+        spec.cutouts = []
+        const embedded = await engine.process(input)
+        const report = embedded.designs.assemblies.case
+        assert.equal(report.machining.filter(p => p.part === 'plate' && p.adjusted).length, 1)
+        assert.ok(Math.abs(embedded.solids.case_plate.volume - direct.solids.case_plate.volume) < 0.001)
+        assert.deepEqual(report.manufacturing.filter(p => p.severity === 'error'), [])
+    })
+    it('merges overlapping plate cutouts before checking webs', async () => {
+        const input = fixture()
+        input.designs.regions.wide = {where: true, size: [20, 14]}
+        const spec = input.designs.assemblies.case
+        spec.cutouts = ['regions.switch', 'regions.wide']
+        spec.manufacturing = {plate: {process: 'cnc', cutter: 3, reach: 30, min_wall: 1, setups: ['top']}}
+        const result = await engine.process(input)
+        const report = result.designs.assemblies.case
+        assert.equal(report.machining.filter(p => p.part === 'plate').length, 1)
+        assert.deepEqual(report.manufacturing.filter(p => p.severity === 'error'), [])
+    })
+    it('reports unsafe relief for holes embedded in a plate profile', async () => {
+        const input = fixture()
+        input.designs.regions.switch.size = [58, 14]
+        input.designs.profiles.plate = {from: 'regions.board', cutouts: ['regions.switch']}
+        Object.assign(input.designs.assemblies.case, {plate_profile: 'profiles.plate', cutouts: [],
+            manufacturing: {plate: {process: 'cnc', cutter: 3, reach: 30, min_wall: 1, setups: ['top']}}})
+        const result = await engine.process(input)
+        assert.ok(result.designs.assemblies.case.manufacturing.some(p => p.code === 'tool-clearance' && /minimum wall/.test(p.message)))
+    })
+    it('preserves circular plate mounting holes during CNC preparation', async () => {
+        const input = fixture()
+        const spec = input.designs.assemblies.case
+        spec.mounts = {side: {role: 'plate', anchor: {shift: [20, 0]}, post: 3, hole: 1}}
+        spec.manufacturing = {plate: {process: 'cnc', cutter: 3, drill: 2, reach: 30, min_wall: 1, setups: ['top']}}
+        const result = await engine.process(input)
+        const holes = result.designs.assemblies.case.machining.filter(p => p.part === 'plate')
+        const bore = holes.find(p => p.radius === 1)
+        assert.ok(bore)
+        assert.equal(bore.adjusted, false)
+        assert.equal(require('../../src/designs/geometry').paths(bore.model)[0].radius, 1)
+    })
     it('blocks relief that would thin the web between switch openings', async () => {
         const input = fixture()
         input.points = {zones: {keys: {columns: {left: {}, right: {key: {spread: 15}}}}}}

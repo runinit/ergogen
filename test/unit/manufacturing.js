@@ -38,10 +38,20 @@ describe('Enclosure manufacturing checks', () => {
         const pockets = [{part:'plate', id:'switch', model:new m.models.Rectangle(14,14), z:0, height:1.5}]
         const spec = {plate:1.5, wall:3, manufacturing:{plate:{process:'cnc', cutter:3, min_wall:0.8}}}
         const bounds = {plate:m.model.center(new m.models.Rectangle(100,100)),
-            posts:[{id:'mounts.tab', model:{paths:{post:new m.paths.Circle([14.4,1],0.2)}}}]}
+            posts:[{id:'mounts.tab', z:0, height:1.5, model:{paths:{post:new m.paths.Circle([14.4,1],0.2)}}}]}
         const [plan] = require('../../src/designs/pocket-plan').prepare(pockets,spec,bounds,'case')
         assert.equal(plan.adjusted,false)
         assert.match(plan.failure,/mounting post/)
+    })
+    it('checks posts only where their height overlaps cutter relief', () => {
+        const pockets = [{part: 'top', id: 'opening', model: new m.models.Rectangle(20,20), z: 20, height: 3}]
+        const spec = {wall: 1, manufacturing: {top: {process: 'cnc', cutter: 3, min_wall: 1}}}
+        for (const [z, height, blocked] of [[0,1,false], [19,1,false], [23,1,false], [24,1,false], [20,1,true]]) {
+            const bounds = {shell: m.model.moveRelative(new m.models.Rectangle(40,40), [-10,-10]),
+                posts: [{id: 'mounts.post', model: m.model.moveRelative(new m.models.Rectangle(1,1), [-1,-1]), z, height}]}
+            const [plan] = require('../../src/designs/pocket-plan').prepare(pockets, spec, bounds, 'case')
+            assert.equal(Boolean(plan.failure), blocked, `post at ${z}`)
+        }
     })
     it('retains material around a nut pocket inside its own post', () => {
         const pockets = [{part:'bottom', id:'mounts.nut', model:new m.models.Polygon(6,1.2), z:0, height:2}]

@@ -59,7 +59,6 @@ exports.compile = async (config, context, options = {}) => {
                 const cutout = resolve(ref).model
                 g.requireContains(opening, cutout, `${name}.opening`)
                 plateModel = subtract(plateModel, cutout)
-                pocket(['plate'], ref, cutout, s.plate_z, s.plate)
             }
             const plateVoids = g.union(g.chains(plateModel).flatMap(chain => chain.contains || []).map(chain => m.chain.toNewModel(chain)))
             const clearPlate = (model, path) => {
@@ -263,6 +262,11 @@ exports.compile = async (config, context, options = {}) => {
             }
             if (s.fillet) { top = kernel.fillet(top, s.fillet, s.height) }
             if (s.chamfer) { top = kernel.chamfer(top, s.chamfer, s.height) }
+            // Inspect the finished plate so profile holes and overlapping cutouts share one plan.
+            const plateChains = g.chains(plateModel)
+            const plateBoundary = g.union(plateChains.map(chain => m.chain.toNewModel(chain)))
+            const plateHoles = plateChains.flatMap(chain => chain.contains || [])
+            plateHoles.forEach((chain, index) => pocket(['plate'], `holes.${index}`, m.chain.toNewModel(chain), s.plate_z, s.plate))
             const plate = kernel.extrude(plateModel, s.plate, s.plate_z)
             const parts = {bottom, top, plate}
             if (s.construction === 'midframe') {
@@ -279,7 +283,7 @@ exports.compile = async (config, context, options = {}) => {
             }
             // Apply only additional tool relief, preserving posts and shelves already built.
             const machining = pocketPlan.prepare(pockets, s, {
-                shell: exterior, plate: s.plate_profile ? resolve(s.plate_profile).model : base,
+                shell: exterior, plate: plateBoundary,
                 posts: features.filter(item => item.id.startsWith('mounts.'))
             }, name)
             for (const {part, model, nominal, z, height, adjusted} of machining) {

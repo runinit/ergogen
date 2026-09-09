@@ -355,3 +355,12 @@ feature-specific blocker. Circular bores retain their specified fit. Side
 access, reach, drilling and setup checks remain separate; this is not CAM or
 physical-fit certification. Source outlines and electrical placements are not
 rewritten by manufacturing preparation.
+
+Plate pockets come from the completed nominal plate, including profile cutouts
+and mounting holes. Boolean geometry merges overlapping openings before pocket
+registration. Outer plate contours bound perimeter relief; individual voids
+remain separate for web checks. Circular holes keep their nominal diameter.
+Post collision checks require overlapping Z intervals beyond the geometry
+tolerance before testing XY removal; touching faces do not block relief.
+Perimeter checks include exact curve bounds before containment sampling so
+short relief arcs cannot escape the minimum-wall envelope between samples.
