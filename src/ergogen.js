@@ -1,71 +1,45 @@
 const u = require('./utils')
 const io = require('./io')
-const prepare = require('./prepare')
-const units_lib = require('./units')
-const points_lib = require('./points')
-const outlines_lib = require('./outlines')
 const cases_lib = require('./cases')
 const designs_lib = require('./designs')
 const pcbs_lib = require('./pcbs')
 
+const gPreview = scene => {
+    const geometry = require('./native/geometry')
+    const models = Object.values(scene.objects).filter(item=>item.kind!=='anchor').flatMap(item=> {
+        const envelope = (item.kind==='key' && item.envelopes.keycap) || item.envelopes.pcb || item.envelopes.body
+        if (!envelope) { return [] }
+        try { return [geometry.project(item, envelope, item.pcb ? scene.boardFrame(item.pcb).matrix : undefined)] }
+        catch { return [] }
+    })
+    return models.length ? {models: Object.fromEntries(models.map((model,index)=>[index,model]))} : null
+}
+
 const version = require('../package.json').version
 
-const process = async (raw, options={}, logger=()=>{}) => {
+const compile = async (raw, options={}, logger=()=>{}) => {
 
-    const prefix = 'Interpreting format: '
+    const native = require('./native/document').parse(raw)
+    const scene = require('./native/layout').resolve(native)
+    const geometry = require('./native/geometry')
+    const config = native
+    const {debug = false, svg = false} = options
     let empty = true
-    let [config, format] = io.interpret(raw, logger)
-    let suffix = format
-    let { debug = false, svg = false } = options
-    // KLE conversion warrants automaticly engaging debug mode
-    // as, usually, we're only interested in the points anyway
-    if (format == 'KLE') {
-        suffix = `${format} (Auto-debug)`
-        debug = true
-    }
-    logger(prefix + suffix)
-    
-    logger('Preprocessing input...')
-    config = prepare.unnest(config)
-    config = prepare.inherit(config)
-    config = prepare.parameterize(config)
-    const results = {}
+    const units = scene.units
+    const points = geometry.points(scene)
+    const results = {layout: geometry.serializable(scene)}
     if (debug) {
         results.raw = raw
         results.canonical = u.deepcopy(config)
-    }
-
-    if (config.meta && config.meta.engine) {
-        logger('Checking compatibility...')
-        const engine = u.semver(config.meta.engine, 'config.meta.engine')
-        if (!u.satisfies(version, engine)) {
-            throw new Error(`Current ergogen version (${version}) doesn\'t satisfy config's engine requirement (${config.meta.engine})!`)
-        }
-    }
-
-    logger('Calculating variables...')
-    const units = units_lib.parse(config)
-    if (debug) {
         results.units = units
-    }
-    
-    logger('Parsing points...')
-    const importedBoard = Object.values(config.designs?.assemblies || {}).some(spec => spec.board?.source === 'asset')
-    if (!config.points && !importedBoard) {
-        throw new Error('Input does not contain a points clause!')
-    }
-    const points = config.points ? points_lib.parse(config.points, units) : {}
-    if (!Object.keys(points).length && !importedBoard) {
-        throw new Error('Input does not contain any points!')
-    }
-    if (debug) {
         results.points = points
-        results.demo = io.twodee(points_lib.visualize(points, units), {debug, svg})
     }
-
-    logger('Generating outlines...')
-    const outlines = outlines_lib.parse(config.outlines || {}, points, units)
-    let caseConfig = config.cases || {}
+    const preview = gPreview(scene)
+    if (preview) { results.demo = io.twodee(preview, {debug, svg}) }
+    if (options.layoutOnly) { return results }
+    const outlines = {}
+    let nativeBoards = {}
+    let caseConfig = {}
     if (config.designs) {
         // Placement edits can reuse contours; every other input invalidates this worker-local cache.
         let analysisKey
@@ -78,7 +52,12 @@ const process = async (raw, options={}, logger=()=>{}) => {
             analysisKey = JSON.stringify([{...config, designs:{...config.designs, assemblies}}, options.assets])
         }
         const design = await designs_lib.parse(config.designs, points, outlines, units, {...options, analysisKey,
-            boardSources: generated => require('./designs/board-link').sources(config, {...outlines,...generated}, points, units, options.assets)})
+            scene, region: (spec, path) => geometry.region(scene, spec, path),
+            shape: (spec,path,point) => geometry.project({matrix:require('./native/frames').local([point.x,point.y,0],point.r),sourcePath:path},scene.envelope(spec,path)),
+            boardSources: generated => {
+                nativeBoards = require('./native/pcbs').compile(config, scene, {...outlines,...generated}, points)
+                return require('./native/boards').sources(config, nativeBoards, options.assets || {})
+            }})
         Object.assign(outlines, design.outlines)
         for (const name of Object.keys(design.cases)) {
             if (Object.prototype.hasOwnProperty.call(caseConfig, name)) {
@@ -109,7 +88,7 @@ const process = async (raw, options={}, logger=()=>{}) => {
     }
 
     logger('Scaffolding PCBs...')
-    const pcbs = pcbs_lib.parse(config, points, outlines, units)
+    const pcbs = Object.fromEntries(Object.entries(nativeBoards).map(([id,board])=>[id,board.source]))
     results.pcbs = {}
     for (const [pcb_name, pcb_text] of Object.entries(pcbs)) {
         if (!debug && pcb_name.startsWith('_')) continue
@@ -121,9 +100,20 @@ const process = async (raw, options={}, logger=()=>{}) => {
 
     if (!debug && empty) {
         logger('Output would be empty, rerunning in debug mode...')
-        return process(raw, {debug: true, svg}, () => {})
+        return process(raw, {...options, debug: true, svg}, () => {})
     }
     return results
+}
+
+const process = async (raw, options={}, logger=()=>{}) => {
+    try {
+        const result=await compile(raw,options,logger)
+        require('./native/document').locate(raw,result.layout?.findings)
+        return result
+    } catch (error) {
+        require('./native/document').locate(raw,error.diagnostics)
+        throw error
+    }
 }
 
 const inject = (type, name, value) => {

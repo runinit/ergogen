@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict')
 const {describe, it} = global.describe ? global : require('node:test')
-const ergogen = require('../../src/ergogen')
+const ergogen = require('../helpers/adapter-engine')
 
 const config = template => ({
     points: {zones: {key: {}}},

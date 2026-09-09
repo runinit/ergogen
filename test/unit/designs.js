@@ -1,4 +1,4 @@
-const engine = require('../../src/ergogen')
+const engine = require('../helpers/adapter-engine')
 const m = require('makerjs')
 
 const config = () => ({

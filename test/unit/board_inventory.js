@@ -42,14 +42,14 @@ it('rejects proposed holes on copper and accepts clear board material without ch
 
 it('resolves an imported PCB without Ergogen layout points', async () => {
     const input={designs:{regions:{case_keys:{where:true},case_switches:{where:true,size:14}},profiles:{case_board:{from:'regions.case_keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.case_board',mounting:'bottom',board:{source:'asset',name:'board.kicad_pcb'},cutouts:['regions.case_switches'],height:24,bezel:10}}}}
-    const result=await require('../../src/ergogen').process(input,{analysis:true,assets:{'board.kicad_pcb':source}})
+    const result=await require('../helpers/adapter-engine').process(input,{analysis:true,assets:{'board.kicad_pcb':source}})
     assert.equal(result.designs.boards.case.thickness,1.2)
     assert.ok(result.designs.analysis.case.model)
     assert.equal(result.designs.analysis.case.parameters.cutouts[0],'regions.__switches_case')
 })
 it('excludes helper points from the layout switch inventory', async () => {
     const input={points:{zones:{keys:{columns:{a:{},b:{}},rows:{home:{}}},helper:{anchor:{shift:[50,0]},key:{tags:['helper']}}}},designs:{regions:{keys:{where:"/^keys_/",close:2}},profiles:{board:{from:'regions.keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.board',mounting:'top',board:{source:'layout',name:'layout',family:'mx'},height:24,bezel:10}}}}
-    const result=await require('../../src/ergogen').process(input,{analysis:true})
+    const result=await require('../helpers/adapter-engine').process(input,{analysis:true})
     assert.equal(result.designs.boards.case.components.length,2)
 })
 
@@ -64,7 +64,7 @@ it('reports unsupported board curves instead of accepting a partial outline', ()
 
 it('resolves component dimension expressions before calculating stack heights', async()=>{
     const input={units:{body:2},points:{zones:{keys:{}}},designs:{regions:{keys:{where:true,size:[60,40]}},profiles:{board:{from:'regions.keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.board',mounting:'bottom',board:{source:'asset',name:'board.kicad_pcb',components:{one:{size:['body*2','body*3'],height:['0','body']}}},height:24}}}}
-    const result=await require('../../src/ergogen').process(input,{analysis:true,assets:{'board.kicad_pcb':source.replace('Switch:SW_MX','Custom:Unknown').replace('"B.Cu"','"F.Cu"')}})
+    const result=await require('../helpers/adapter-engine').process(input,{analysis:true,assets:{'board.kicad_pcb':source.replace('Switch:SW_MX','Custom:Unknown').replace('"B.Cu"','"F.Cu"')}})
     const component=result.designs.analysis.case.parameters.components[0]
     const bounds=result.designs.features[component].bounds
     assert.equal(bounds.width,6)
@@ -73,7 +73,7 @@ it('resolves component dimension expressions before calculating stack heights', 
 
 it('keeps keycap clearance unresolved until measured envelopes are provided', async()=>{
     const input={points:{zones:{keys:{}}},designs:{regions:{keys:{where:true,size:20}},profiles:{board:{from:'regions.keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.board',mounting:'gasket',board:{source:'layout',family:'mx',name:'layout'},height:24}}}}
-    const engine=require('../../src/ergogen')
+    const engine=require('../helpers/adapter-engine')
     const initial=await engine.process(input,{analysis:true})
     assert.ok(initial.designs.boards.case.findings.some(f=>f.code==='keycaps'&&f.severity==='warning'))
     input.designs.assemblies.case.board.keycaps={size:[18,18],height:[0,9]}
@@ -84,7 +84,7 @@ it('keeps keycap clearance unresolved until measured envelopes are provided', as
 
 it('identifies a PCB-to-enclosure outline dependency cycle before CAD',async()=>{
     const input={points:{zones:{keys:{}}},pcbs:{board:{outlines:{edge:{outline:'case_plate',layer:'Edge.Cuts'}}}},designs:{regions:{keys:{where:true,size:20}},profiles:{board:{from:'regions.keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.board',mounting:'top',board:{source:'generated',name:'board'}}}}}
-    await assert.rejects(require('../../src/ergogen').process(input,{analysis:true}),error=>{
+    await assert.rejects(require('../helpers/adapter-engine').process(input,{analysis:true}),error=>{
         assert.match(error.message,/Dependency cycle.*board.*case_plate.*case/)
         assert.equal(error.diagnostics[0].code,'dependency-cycle')
         return true
@@ -93,7 +93,7 @@ it('identifies a PCB-to-enclosure outline dependency cycle before CAD',async()=>
 
 it('allows unresolved component envelopes while keeping clearance visibly incomplete', async () => {
     const input={points:{zones:{keys:{}}},designs:{regions:{keys:{where:true}},profiles:{board:{from:'regions.keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.board',mounting:'bottom',board:{source:'asset',name:'board.kicad_pcb'},height:24,bezel:10}}}}
-    const result=await require('../../src/ergogen').process(input,{analysis:true,assets:{'board.kicad_pcb':source.replace('Switch:SW_MX','Custom:Unknown')}})
+    const result=await require('../helpers/adapter-engine').process(input,{analysis:true,assets:{'board.kicad_pcb':source.replace('Switch:SW_MX','Custom:Unknown')}})
     const findings=result.designs.boards.case.findings.filter(f=>f.code==='component-height')
     assert.equal(findings.length,1)
     assert.equal(findings[0].severity,'warning')

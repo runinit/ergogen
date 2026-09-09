@@ -1,0 +1,3713 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://runinit.github.io/ergogen/schema/ergogen-v1.json",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "ergogen/v1"
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ]
+      }
+    },
+    "parts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "envelopes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "size": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "radius": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "height": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "at": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "rotate": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "clearance": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "corner_radius": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "corner_relief": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "polygon": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "attachments": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "at": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "rotate": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "tilt": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "above": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "below": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "gap": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "override": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "footprints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "what": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "placement": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "what"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          }
+        },
+        "required": [
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+      }
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "objects": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "key",
+                  "component",
+                  "mount",
+                  "anchor"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "part": {
+                "type": "string",
+                "minLength": 1
+              },
+              "cluster": {
+                "type": "string",
+                "minLength": 1
+              },
+              "layer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "placement": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotate": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "tilt": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "above": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "below": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "gap": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "override": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "rotate": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "cell": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "pcb": {
+                "type": "string",
+                "minLength": 1
+              },
+              "side": {
+                "enum": [
+                  "top",
+                  "bottom"
+                ]
+              },
+              "properties": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "envelopes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "height": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "clearance": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_relief": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "attachments": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "tilt": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "above": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "below": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "gap": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "override": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "rotate": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "footprints": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "what": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "params": {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "placement": {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                ]
+                              },
+                              "minItems": 3,
+                              "maxItems": 3
+                            },
+                            "rotate": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              ]
+                            }
+                          },
+                          "required": [],
+                          "additionalProperties": false
+                        },
+                        "reference": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "models": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+          }
+        },
+        "layers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "surface": {
+                "type": "string",
+                "minLength": 1
+              },
+              "placement": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotate": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "tilt": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "above": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "below": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "gap": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "override": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "rotate": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "assembly": {
+                "type": "string",
+                "minLength": 1
+              },
+              "motion": {
+                "enum": [
+                  "fixed",
+                  "floating"
+                ]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+          }
+        },
+        "clusters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "layer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "placement": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotate": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "tilt": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "above": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "below": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "gap": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "override": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "rotate": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "arrangement": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "free",
+                      "columns",
+                      "arc"
+                    ]
+                  },
+                  "pitch": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "columns": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "stagger": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    }
+                  },
+                  "splay": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    }
+                  },
+                  "radius": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "start": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "step": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              "mirror": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "axis": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "source",
+                  "axis"
+                ],
+                "additionalProperties": false
+              },
+              "overrides": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "key",
+                        "component",
+                        "mount",
+                        "anchor"
+                      ]
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "part": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "cluster": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "layer": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "placement": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "at": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "rotate": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "tilt": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "above": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "below": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "gap": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "override": {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                ]
+                              },
+                              "minItems": 3,
+                              "maxItems": 3
+                            },
+                            "rotate": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              ]
+                            }
+                          },
+                          "required": [],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "cell": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "locked": {
+                      "type": "boolean"
+                    },
+                    "pcb": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "side": {
+                      "enum": [
+                        "top",
+                        "bottom"
+                      ]
+                    },
+                    "properties": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "envelopes": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "size": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              ]
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                          },
+                          "radius": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "height": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              ]
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                          },
+                          "at": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              ]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "rotate": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "clearance": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "corner_radius": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "corner_relief": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "polygon": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                ]
+                              },
+                              "minItems": 2,
+                              "maxItems": 2
+                            }
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": false
+                      }
+                    },
+                    "attachments": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "ref": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "at": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              ]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "rotate": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "tilt": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "above": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "below": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "gap": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            ]
+                          },
+                          "override": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "array",
+                                "items": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    }
+                                  ]
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                              },
+                              "rotate": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": false
+                      }
+                    },
+                    "footprints": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "what": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "params": {
+                                "type": "object",
+                                "additionalProperties": {}
+                              },
+                              "placement": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "array",
+                                    "items": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "string",
+                                          "minLength": 1
+                                        }
+                                      ]
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                  },
+                                  "rotate": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "minLength": 1
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [],
+                                "additionalProperties": false
+                              },
+                              "reference": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "models": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "designs": {
+      "type": "object",
+      "properties": {
+        "regions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "select": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    ]
+                  },
+                  "cluster": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    ]
+                  },
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "pcb": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "layer": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "envelope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "wrap": {
+                "enum": [
+                  "tight",
+                  "hull",
+                  "box"
+                ]
+              },
+              "shape": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "radius": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "height": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotate": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "clearance": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "corner_radius": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "corner_relief": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "polygon": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "anchor": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "close": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "clearance": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "round": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "connected": {
+                "enum": [
+                  "single",
+                  "multiple"
+                ]
+              },
+              "modifications": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "height": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "clearance": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_relief": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
+                    "anchor": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "from": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "operation": {
+                      "enum": [
+                        "add",
+                        "subtract",
+                        "intersect"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "boundaries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                ]
+              },
+              "close": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "clearance": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "round": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "simplify": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "corners": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "fillet": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "fillet"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "chamfer": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "chamfer"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "connected": {
+                "enum": [
+                  "single",
+                  "multiple"
+                ]
+              },
+              "modifications": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "height": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "clearance": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_relief": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
+                    "anchor": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "from": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "operation": {
+                      "enum": [
+                        "add",
+                        "subtract",
+                        "intersect"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "bridges": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "to": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "width": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "ends": {
+                      "enum": [
+                        "round",
+                        "flat"
+                      ]
+                    },
+                    "align": {
+                      "enum": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "width"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "cutouts": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "gaps": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                ]
+              },
+              "close": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "clearance": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "round": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "simplify": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "corners": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "fillet": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "fillet"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "chamfer": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "chamfer"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "connected": {
+                "enum": [
+                  "single",
+                  "multiple"
+                ]
+              },
+              "modifications": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "height": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "at": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "rotate": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "clearance": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_radius": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "corner_relief": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
+                    "anchor": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "from": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "operation": {
+                      "enum": [
+                        "add",
+                        "subtract",
+                        "intersect"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "bridges": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "to": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "width": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "ends": {
+                      "enum": [
+                        "round",
+                        "flat"
+                      ]
+                    },
+                    "align": {
+                      "enum": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "width"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "cutouts": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "gaps": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "sketches": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "assemblies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "preset": {},
+              "profile": {},
+              "plate_profile": {},
+              "pcb_profile": {},
+              "mounting": {},
+              "construction": {},
+              "supplier": {},
+              "board": {},
+              "manufacturing": {},
+              "wall": {},
+              "floor": {},
+              "height": {},
+              "lid": {},
+              "plate": {},
+              "plate_z": {},
+              "pcb_z": {},
+              "pcb_thickness": {},
+              "bezel": {},
+              "fit": {},
+              "internal_radius": {},
+              "opening": {},
+              "openings": {},
+              "components": {},
+              "cutouts": {},
+              "mounts": {},
+              "gaskets": {},
+              "gasket": {},
+              "ledge": {},
+              "seam": {},
+              "typing_angle": {},
+              "front_height": {},
+              "fillet": {},
+              "chamfer": {},
+              "mount_count": {},
+              "spacing": {},
+              "layers": {},
+              "thickness": {},
+              "clearance": {}
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "pcbs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "thickness": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "placement": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "rotate": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "tilt": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "above": {
+                "type": "string",
+                "minLength": 1
+              },
+              "below": {
+                "type": "string",
+                "minLength": 1
+              },
+              "gap": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "override": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotate": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "references": {
+            "type": "boolean"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "source": {
+            "enum": [
+              "asset"
+            ]
+          },
+          "asset": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "layout"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "placement": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "rotate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "tilt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "above": {
+          "type": "string",
+          "minLength": 1
+        },
+        "below": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gap": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "override": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotate": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "envelope": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "height": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "at": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "rotate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "clearance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "corner_radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "corner_relief": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "polygon": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "selector": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          ]
+        },
+        "cluster": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pcb": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "object": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "key",
+            "component",
+            "mount",
+            "anchor"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "part": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "placement": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "at": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotate": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            },
+            "tilt": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            },
+            "above": {
+              "type": "string",
+              "minLength": 1
+            },
+            "below": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gap": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            },
+            "override": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "rotate": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "cell": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "pcb": {
+          "type": "string",
+          "minLength": 1
+        },
+        "side": {
+          "enum": [
+            "top",
+            "bottom"
+          ]
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "envelopes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "size": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "radius": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "height": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "rotate": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "clearance": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "corner_radius": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "corner_relief": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "polygon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "attachments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  ]
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "rotate": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "tilt": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "above": {
+                "type": "string",
+                "minLength": 1
+              },
+              "below": {
+                "type": "string",
+                "minLength": 1
+              },
+              "gap": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "override": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotate": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "footprints": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "what": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "params": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "placement": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          ]
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "rotate": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "reference": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

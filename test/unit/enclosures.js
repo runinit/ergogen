@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict')
-const engine = require('../../src/ergogen')
+const engine = require('../helpers/adapter-engine')
 
 const fixture = (mounting = 'tray') => ({
     points: {zones: {key: {}}},

@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict')
-const engine = require('../../src/ergogen')
+const engine = require('../helpers/adapter-engine')
 const fixture = () => ({points: {zones: {keys: {columns: {a: {}, b: {}, c: {}}, rows: {a: {}, b: {}}}}},
     designs: {regions: {keys: {where: true, close: 2}, switches: {where: true, size: 14}},
         profiles: {board: {from: 'regions.keys', clearance: 2}},

@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict')
 const makerjs = require('makerjs')
-const engine = require('../../src/ergogen')
+const engine = require('../helpers/adapter-engine')
 const kernels = require('../../src/designs/solid-kernel')
 
 describe('Native footprint models', function() {

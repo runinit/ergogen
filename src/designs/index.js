@@ -52,6 +52,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         catch (error) { g.fail(name, error.message, 'reference') }
     }
     const shape = (spec, name, point = locate(spec.anchor, `${name}.anchor`)) => {
+        if (options.shape) { return options.shape(spec,name,point) }
         let model
         if (spec.radius !== undefined) {
             model = {paths: {circle: new m.paths.Circle([0, 0], g.positive(spec.radius, `${name}.radius`, units))}}
@@ -104,6 +105,17 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         if (rounding < 0) { g.fail(name, 'Rounding must be nonnegative') }
         model = g.offset(model, clearance)
         model = g.round(model, rounding)
+        const simplification = dim(spec.simplify || 0, `${name}.simplify`)
+        if (simplification < 0) { g.fail(`${name}.simplify`, 'Simplification must be nonnegative') }
+        if (simplification) { model = require('./finishing').simplify(model, simplification) }
+        if (spec.corners) {
+            a.unexpected(spec.corners, `${name}.corners`, ['fillet', 'chamfer'])
+            const styles = Object.keys(spec.corners)
+            if (styles.length !== 1) { g.fail(`${name}.corners`, 'Choose fillet or chamfer') }
+            const style = styles[0]
+            const size = g.positive(spec.corners[style], `${name}.corners.${style}`, units)
+            model = require('./finishing').corners(model, {[style]:size}, `${name}.corners`)
+        }
         const required = !g.empty(occupied) && clearance > 0 ? g.offset(occupied, clearance) : occupied
         model = modify(model, spec, name, required)
         g.validate(model, name, spec.connected || 'multiple')
@@ -123,8 +135,12 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         try {
             let model, occupied = {paths: {}}, groups = []
             if (section === 'regions') {
-                a.unexpected(spec, name, ['where', 'asym', 'size', 'corner_radius', 'corner_relief', 'outline', 'close', 'clearance', 'round', 'connected', 'modifications'])
-                if (spec.outline) {
+                a.unexpected(spec, name, ['select', 'envelope', 'wrap', 'shape', 'where', 'asym', 'size', 'corner_radius', 'corner_relief', 'outline', 'close', 'clearance', 'round', 'connected', 'modifications'])
+                if (options.region && spec.select) {
+                    groups = options.region(spec, name)
+                } else if (spec.shape) {
+                    groups = [shape(spec.shape, name)]
+                } else if (spec.outline) {
                     if (!own(outlines, spec.outline)) { g.fail(name, `Missing outline ${spec.outline}`, 'reference') }
                     groups = [g.clone(outlines[spec.outline])]
                 } else {
@@ -144,7 +160,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
                     g.fail(name, 'Clearance joins separated halves; use a named bridge', 'disconnected')
                 }
             } else if (section === 'boundaries' || section === 'profiles') {
-                a.unexpected(spec, name, ['from', 'close', 'clearance', 'round', 'connected', 'modifications', 'bridges', 'cutouts'])
+                a.unexpected(spec, name, ['from', 'close', 'clearance', 'round', 'simplify', 'corners', 'connected', 'modifications', 'bridges', 'cutouts', 'gaps'])
                 const refs = Array.isArray(spec.from) ? spec.from : [spec.from]
                 const sources = refs.map(resolve)
                 occupied = g.union(sources.map(source => source.occupied))
@@ -159,15 +175,34 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
                     const to = locate(bridgeSpec.to, `${path}.to`).p
                     const width = g.positive(bridgeSpec.width, `${path}.width`, units)
                     if (m.measure.pointDistance(from, to) < g.EPSILON) { g.fail(path, 'Bridge anchors coincide') }
-                    const bridgeModel = new m.models.Slot(from, to, width / 2)
+                    let bridgeModel
+                    if (bridgeSpec.align) {
+                        if (!['top','bottom','left','right'].includes(bridgeSpec.align)) { g.fail(path,'Unknown bridge alignment') }
+                        if ([bridgeSpec.from,bridgeSpec.to].some(anchor=>!anchor.feature || Object.keys(anchor).length!==1) || bridgeSpec.ends) {
+                            g.fail(path,'Aligned bridges require feature-only anchors and no ends setting')
+                        }
+                        bridgeModel = require('./bridges').aligned(resolve(bridgeSpec.from.feature).model,resolve(bridgeSpec.to.feature).model,width,bridgeSpec.align,path)
+                    } else if (bridgeSpec.ends === 'flat') {
+                        // Flat webs stop at their attachments instead of adding circular lobes.
+                        const length = m.measure.pointDistance(from, to)
+                        const normal = [-(to[1]-from[1]), to[0]-from[0]].map(v => v*width/(2*length))
+                        const corner = (point, side) => point.map((v,i) => v+side*normal[i])
+                        bridgeModel = new m.models.ConnectTheDots(true,[corner(from,1),corner(to,1),corner(to,-1),corner(from,-1)])
+                    } else {
+                        bridgeModel = new m.models.Slot(from, to, width / 2)
+                    }
                     for (const point of [from, to]) {
                         if (!m.measure.isPointInsideModel(point, model)) { g.fail(path, 'Bridge attachment is outside its region') }
                     }
                     model = g.combine(model, bridgeModel)
                     features[`${ref}.bridges.${bridge}`] = g.describe(bridgeModel, path)
                 }
+                for (const gap of spec.gaps || []) { model = g.combine(model, resolve(gap).model, 'subtract') }
                 const before = g.chains(model).length
                 model = finish(model, spec, name, occupied)
+                for (const gap of spec.gaps || []) {
+                    if (!g.empty(g.combine(model, resolve(gap).model, 'intersect'))) { g.fail(name, `Boundary enters protected gap ${gap}`, 'clearance') }
+                }
                 if (!Object.keys(spec.bridges || {}).length && g.chains(model).length < before) {
                     g.fail(name, 'Profiles cannot join separate regions without a named bridge', 'disconnected')
                 }
@@ -213,7 +248,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         for (const id of Object.keys(config[section] || {})) { resolve(`${section}.${id}`) }
     }
     const boards = options.boardSources ? options.boardSources(generated) : {}
-    config = require('./board-link').attach(config, boards, {resolved, features, units, shape, assets:options.assets})
+    config = options.scene ? require('../native/boards').attach(config, boards, {resolved, features, units, shape, scene:options.scene, assets:options.assets}) : require('./board-link').attach(config, boards, {resolved, features, units, shape, assets:options.assets})
     report.boards = boards
     if (Object.keys(config.assemblies || {}).length) {
         const assemblies = require('./assemblies')
@@ -222,6 +257,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
     }
     report.analysis = require('./enclosure-analysis').analyze(config, {resolve, locate, shape, units, boards})
     for (const [id, board] of Object.entries(boards)) { report.analysis[id]?.findings.push(...board.findings) }
+    for (const plan of Object.values(report.analysis)) { plan.findings.push(...(options.scene?.findings || [])) }
     if (options.analysis) {
         const result = {outlines: generated, cases, report, solids: {}}
         if (options.analysisCache && options.analysisKey) {

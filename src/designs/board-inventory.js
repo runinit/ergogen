@@ -37,15 +37,53 @@ const graphics = nodes => {
     return result
 }
 
+// Preserve pad area for native edge checks; copper obstacles retain their existing circles.
+const padArea = (pad, position) => {
+    const size = nums(child(pad,'size'))
+    if (size.length!==2 || size.some(v=>!Number.isFinite(v) || v<=0)) { return null }
+    const [width,height] = size, shape = pad[3]
+    let model, approximate = !['circle','oval','rect','roundrect'].includes(shape)
+    if (shape==='circle') {
+        model = {paths:{pad:new m.paths.Circle([0,0],width/2)}}
+    } else if (shape==='oval') {
+        const axis = width>=height?0:1, radius = Math.min(...size)/2
+        const end = [0,0]; end[axis] = Math.max(...size)/2-radius
+        model = end[axis] ? new m.models.Slot(end.map(v=>-v),end,radius) : {paths:{pad:new m.paths.Circle([0,0],radius)}}
+    } else if (shape==='roundrect') {
+        const radius = Number(child(pad,'roundrect_rratio')[1] || 0)*Math.min(...size)
+        model = m.model.center(radius ? new m.models.RoundRectangle(width,height,radius) : new m.models.Rectangle(width,height))
+    } else {
+        model = m.model.center(new m.models.Rectangle(width,height))
+    }
+    if (shape==='custom') {
+        const primitives = child(pad,'primitives').slice(1)
+        const anchor = child(child(pad,'options'),'anchor')[1]
+        if (['rect','circle'].includes(anchor) && primitives.length && primitives.every(p=>p[0]==='gr_poly' && child(p,'fill')[1]==='yes' && Number(child(p,'width')[1] || 0)===0)) {
+            const base = anchor==='circle' ? {paths:{anchor:new m.paths.Circle([0,0],width/2)}} : model
+            model = g.union([base,...primitives.map(p=>graphics([p]))])
+            approximate = false
+        }
+    }
+    m.model.rotate(model,Number(child(pad,'at')[3] || 0),[0,0])
+    return {model:m.model.moveRelative(model,position),approximate}
+}
+
 // Import mechanical data only. Keep the original source for lossless board patches.
 exports.read = source => {
     const root = sexpr.parse(source, 'PCB import')[0]
     if (root?.[0] !== 'kicad_pcb') { throw new Error('Select a .kicad_pcb board file.') }
-    const components = [], holes = [], obstacles = [], footprintZones = []
     const outline = root.filter(node => Array.isArray(node) && layer(node) === 'Edge.Cuts')
     if (outline.some(node => !/^gr_(line|rect|circle|poly|arc)$/.test(node[0]))) { throw new Error('Unsupported Edge.Cuts geometry. Convert board curves to arcs or line segments before importing.') }
     const model = graphics(outline)
     if (g.empty(model)) { throw new Error('The PCB has no supported Edge.Cuts outline.') }
+    return inspect(root,model)
+}
+
+// Footprint adapters contribute copper geometry without reclassifying native objects.
+exports.fragments = (fragments, model) => inspect(['kicad_pcb', ...fragments.flatMap(source => sexpr.parse(source,'Footprint inventory'))],model)
+
+const inspect = (root, model) => {
+    const components = [], holes = [], obstacles = [], footprintZones = [], pads = []
     for (const [index, fp] of [...children(root,'footprint'), ...children(root,'module')].entries()) {
         const at = child(fp,'at'), side = layer(fp) === 'B.Cu' ? 'bottom' : 'top'
         for (const zone of children(fp,'zone')) {
@@ -64,6 +102,8 @@ exports.read = source => {
         if (!/mounting.?hole/i.test(footprint)) { components.push(item) }
         for (const pad of children(fp,'pad')) {
             const position = transformed(xy(child(pad,'at')),at,side)
+            const area = padArea(pad,position)
+            if (area) { pads.push({...area,reference,number:text(pad[1])}) }
             const dimensions = nums(child(pad,'size'))
             const diameter = Number(child(pad,'drill').find(v => /^\d/.test(v)) || 0)
             if (pad[2] === 'np_thru_hole' && diameter > 0 && /mounting.?hole/i.test(footprint)) { holes.push({id:`${id}_${text(pad[1])}`, position, diameter}) }
@@ -75,7 +115,7 @@ exports.read = source => {
     const copperGraphics = root.some(node=>Array.isArray(node)&&/^gr_/.test(node[0])&&/\.Cu$/.test(layer(node))) || children(root,'footprint').some(fp=>fp.some(node=>Array.isArray(node)&&/^fp_(line|arc|circle|rect|poly|text|text_box)$/.test(node[0])&&/\.Cu$/.test(layer(node))))
     const traces = [...children(root,'segment'), ...children(root,'arc')].map(node => ({start:xy(child(node,'start')),end:xy(child(node,'end')),width:Number(child(node,'width')[1]||0), arc:node[0]==='arc'}))
     const zones = [...footprintZones,...children(root,'zone').flatMap(zone => children(zone,'polygon').map(polygon => children(child(polygon,'pts'),'xy').map(xy)))]
-    return {thickness:Number(child(child(root,'general'),'thickness')[1]||1.6), model, components, holes, obstacles, traces, zones, copperGraphics}
+    return {thickness:Number(child(child(root,'general'),'thickness')[1]||1.6), model, components, holes, obstacles, traces, zones, copperGraphics, pads}
 }
 const distance = (p,a,b) => {
     const delta = [b[0]-a[0],b[1]-a[1]], norm = delta[0]**2+delta[1]**2

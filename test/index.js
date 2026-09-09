@@ -4,7 +4,7 @@ const yaml = require('js-yaml')
 const glob = require('glob')
 const u = require('../src/utils')
 const a = require('../src/assert')
-const ergogen = require('../src/ergogen')
+const ergogen = require('./helpers/adapter-engine')
 require('./helpers/mock').inject(ergogen)
 
 let what = process.env.npm_config_what
@@ -89,8 +89,8 @@ const test = function(input_path) {
                     }
                 } else {
                     if (a.type(output_part)() == 'string') {
-                        const parse_out = output_part.replace(lineends, '\n')
-                        const parse_exp = expected.replace(lineends, '\n')
+                        const parse_out = output_part.replace(lineends, '\n').replace(/\(generator_version \"[^\"]+\"\)/g, '(generator_version \"<version>\")')
+                        const parse_exp = expected.replace(lineends, '\n').replace(/\(generator_version \"[^\"]+\"\)/g, '(generator_version \"<version>\")')
                         parse_out.should.deep.equal(parse_exp)
                     } else {
                         // JSON can hide negative zeroes, for example, so we canonical-ize first
@@ -137,82 +137,4 @@ if (what) {
 
 
 
-// End-to-end tests to actually drive the CLI as well
-// --what is the same as above ('cli', or 'cli/prefix')
-// --dump automatically overrides the old reference
-
-const joiner = (a, b) => path.join(a, b)
-const read = (...args) => fs.readFileSync(args.reduce(joiner, '')).toString()
-const exists = (...args) => fs.existsSync(args.reduce(joiner, ''))
-const { execSync } = require('child_process')
-const dircompare = require('dir-compare')
-
-const cli_what = what ? what.filter(w => w.startsWith('cli')) : ['cli']
-
-for (let w of cli_what) {
-    if (!w.includes('/')) w += '/'
-    if (!w.endsWith('*')) w += '*'
-    describe('CLI', function() {
-        this.timeout(120000)
-        this.slow(120000)
-        for (const t of glob.sync(handle_slash(path.join(__dirname, w)))) {
-            it(path.basename(t).split('_').join(' '), function() {
-                const command = read(t, 'command')
-                const output_path = exists(t, 'path') ? read(t, 'path') : 'output'
-                fs.removeSync(output_path)
-                const version_regex = /\bv\d+\.\d+\.\d+(\-develop)?\b/
-                // correct execution
-                if (!exists(t, 'error')) {
-                    let ref_log = ''
-                    if (exists(t, 'log')) {
-                        ref_log = read(t, 'log')
-                            .replace(version_regex, '<version>')
-                            .replace(lineends, '\n')
-                    }
-                    const actual_log = execSync(command).toString()
-                        .replace(version_regex, '<version>')
-                        .replace(lineends, '\n')
-                    if (dump) {
-                        fs.writeFileSync(path.join(t, 'log'), actual_log)
-                    }
-                    let ref_path = path.join(t, 'reference')
-                    if (!exists(ref_path)) {
-                        fs.mkdirpSync(ref_path)
-                    }
-                    if (fs.statSync(ref_path).isFile()) {
-                        ref_path = path.resolve(path.join(t, read(ref_path).trim()))
-                    }
-                    const comp_res = dircompare.compareSync(output_path, ref_path, {
-                        compareContent: true,
-                        ignoreLineEnding: true,
-                        compareFileSync: dircompare.fileCompareHandlers.lineBasedFileCompare.compareSync,
-                        compareFileAsync: dircompare.fileCompareHandlers.lineBasedFileCompare.compareAsync
-                    })
-                    if (dump) {
-                        fs.moveSync(output_path, ref_path, {overwrite: true})
-                    } else {
-                        fs.removeSync(output_path)
-                    }
-                    actual_log.should.equal(ref_log)
-                    comp_res.same.should.be.true
-                // deliberately incorrect execution
-                } else {
-                    const ref_error = read(t, 'error')
-                    try {
-                        execSync(command, {stdio: 'pipe'})
-                        throw 'should_have_thrown'
-                    } catch (ex) {
-                        if (ex === 'should_have_thrown') {
-                            throw new Error('This command should have thrown!')
-                        }
-                        const actual_error = ex.stderr.toString()
-                        if (dump) {
-                            fs.writeFileSync(path.join(t, 'error'), actual_error)
-                        }
-                        actual_error.includes(ref_error).should.be.true
-                    }
-                }
-            })
-        }
-    })
-}
+// Native CLI coverage is in unit/native_cli.js. Historical CLI snapshots remain archival.

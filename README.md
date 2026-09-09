@@ -1,5 +1,6 @@
-
 # Ergogen
+
+Native configurations use `schema: ergogen/v1`. Read the [living architecture](docs/architecture.md) and [native examples](docs/examples/native/README.md). Historical configs are not accepted by the public API.
 
 ***Ergonomic Keyboard Generator***
 

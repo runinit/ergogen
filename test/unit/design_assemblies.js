@@ -1,4 +1,4 @@
-const engine = require('../../src/ergogen')
+const engine = require('../helpers/adapter-engine')
 const base = preset => ({points: {zones: {key: {}}},
     outlines: {edge: [{what: 'rectangle', size: [60, 40]}]},
     designs: {regions: {edge: {outline: 'edge'}}, profiles: {pcb: {from: 'regions.edge'}},

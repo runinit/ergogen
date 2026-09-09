@@ -1,0 +1,222 @@
+schema: ergogen/v1
+meta:
+  name: Physical stack
+  note: Demonstration dimensions, not a measured keyboard.
+units:
+  pitch: 19
+parts:
+  mx:
+    revision: "1"
+    envelopes:
+      pcb:
+        size:
+          - 18
+          - 18
+      plate:
+        size:
+          - 14
+          - 14
+      body:
+        size:
+          - 14
+          - 14
+        height:
+          - 0
+          - 11.6
+    footprints:
+      switch:
+        what: mx
+        params:
+          from: "{{column_net}}"
+          to: "{{row_net}}"
+  controller:
+    revision: demo-1
+    envelopes:
+      pcb:
+        size:
+          - 18
+          - 30
+      body:
+        size:
+          - 18
+          - 30
+        height:
+          - 0
+          - 4
+  display:
+    revision: demo-1
+    envelopes:
+      body:
+        size:
+          - 16
+          - 28
+        height:
+          - 0
+          - 2
+  battery:
+    revision: demo-1
+    envelopes:
+      body:
+        size:
+          - 20
+          - 28
+        height:
+          - 0
+          - 3
+layout:
+  layers:
+    switches:
+      surface: pcb.main.top
+    floor:
+      surface: case.keyboard.floor
+      assembly: keyboard
+  clusters:
+    fingers:
+      layer: switches
+      arrangement:
+        type: columns
+        columns:
+          - outer
+          - inner
+        rows:
+          - home
+          - top
+        pitch:
+          - pitch
+          - pitch
+        stagger:
+          inner: 3
+    electronics:
+      layer: switches
+      arrangement:
+        type: free
+      placement:
+        at:
+          - 60
+          - 10
+          - 0
+  objects:
+    outer_home:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - outer
+        - home
+      properties:
+        column_net: outer
+        row_net: home
+    outer_top:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - outer
+        - top
+      properties:
+        column_net: outer
+        row_net: top
+    inner_home:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - inner
+        - home
+      properties:
+        column_net: inner
+        row_net: home
+    inner_top:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - inner
+        - top
+      properties:
+        column_net: inner
+        row_net: top
+    mcu:
+      kind: component
+      part: controller
+      cluster: electronics
+      pcb: main
+    screen:
+      kind: component
+      part: display
+      pcb: main
+      envelopes:
+        plate:
+          size:
+            - 18
+            - 30
+      layer: switches
+      placement:
+        ref: mcu
+        above: mcu.body.top
+        gap: 1
+    battery:
+      kind: component
+      part: battery
+      layer: floor
+      placement:
+        at:
+          - 10
+          - 8
+          - 0.5
+designs:
+  regions:
+    keys:
+      select:
+        kind: key
+      envelope: pcb
+      close: 2
+    electronics:
+      select:
+        ids:
+          - mcu
+      envelope: pcb
+  profiles:
+    board:
+      from: boundaries.body
+  boundaries:
+    body:
+      from:
+        - regions.keys
+        - regions.electronics
+      bridges:
+        electronics:
+          from:
+            ref: inner_home
+          to:
+            ref: mcu
+          width: 14
+      clearance: 2
+      connected: single
+  assemblies:
+    keyboard:
+      preset: enclosure
+      profile: profiles.board
+      board:
+        source: generated
+        name: main
+      mounting: bottom
+      wall: 3
+      floor: 2
+      height: 24
+      plate: 1.5
+      plate_z: 13
+      pcb_z: 6
+      bezel: 10
+      fit: 0.5
+      ledge:
+        width: 2
+        thickness: 2
+pcbs:
+  main:
+    profile: profiles.board
+    thickness: 1.6

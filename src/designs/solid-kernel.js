@@ -88,6 +88,25 @@ exports.open = async (options = {}) => {
         intersect: (left, right) => keep(left.intersect(right)),
         move: (shape, offset) => keep(shape.clone().translate(offset)),
         rotate: (shape, angle, origin = [0, 0, 0]) => keep(shape.clone().rotate(angle, origin, [1, 0, 0])),
+        placeRigid: (shape, matrix) => {
+            const cosine=Math.max(-1,Math.min(1,(matrix[0]+matrix[5]+matrix[10]-1)/2))
+            const angle=Math.acos(cosine)
+            let result=keep(shape.clone())
+            if (angle>g.EPSILON) {
+                let axis=[matrix[9]-matrix[6],matrix[2]-matrix[8],matrix[4]-matrix[1]]
+                if (Math.hypot(...axis)<g.EPSILON) {
+                    const diagonal=[matrix[0],matrix[5],matrix[10]]
+                    const largest=diagonal.indexOf(Math.max(...diagonal))
+                    axis=[0,0,0]
+                    axis[largest]=Math.sqrt((diagonal[largest]+1)/2)
+                    for (let i=0;i<3;i++) {
+                        if (i!==largest) { axis[i]=(matrix[largest*4+i]+matrix[i*4+largest])/(4*axis[largest]) }
+                    }
+                }
+                result=keep(result.rotate(angle*180/Math.PI,[0,0,0],axis))
+            }
+            return keep(result.translate([matrix[3],matrix[7],matrix[11]]))
+        },
         fillet: (shape, radius, z) => keep(shape.fillet(radius, edges => edges.inPlane('XY', z))),
         chamfer: (shape, distance, z) => keep(shape.chamfer(distance, edges => edges.inPlane('XY', z))),
         volume: shape => Math.abs(r.measureVolume(shape)),

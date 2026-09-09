@@ -1,6 +1,6 @@
 const yaml = require('js-yaml')
-const ergogen = require('../../src/ergogen')
-const version = require('../../package.json').version
+const ergogen = require('../helpers/adapter-engine')
+const version = require('../helpers/adapter-engine').version
 const {fixture} = require('../helpers/fixture')
 
 // fixtures

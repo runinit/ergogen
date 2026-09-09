@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict')
 const vm = require('node:vm')
-const tools = require('../../src/ergogen').footprints
+const tools = require('../helpers/adapter-engine').footprints
 const sexpr = require('../../src/templates/sexpr')
 const inventory = require('../../src/designs/board-inventory')
 
@@ -127,7 +127,7 @@ it('assigns distinct stable KiCad identities to repeated imported placements', (
     assert.equal(id('U1'),id('U1'));
 });
 it('supports declarative model bindings through the existing injection API', async () => {
-    const ergogen = require('../../src/ergogen');
+    const ergogen = require('../helpers/adapter-engine');
     const module = evaluate(tools.convert(sample).source);
     module.modelBindings = p => ({models:[binding(`${p.ref}.step`),binding('second.step')]});
     ergogen.inject('footprint','declarative_test',module);
@@ -135,8 +135,8 @@ it('supports declarative model bindings through the existing injection API', asy
     assert.ok(result.pcbs.board.includes('(model "U1.step"'));
     assert.ok(result.pcbs.board.includes('(model "second.step"'));
 });
-it('counts actual linked placements after inheritance and point filtering', () => {
-    const source = {points:{zones:{keys:{columns:{one:{},two:{}}}}},pcbs:{board:{footprints:{base:{what:'linked',where:true},single:{what:'other',where:true}}}}};
+it('counts native part bindings and explicit instances', () => {
+    const source = {schema:'ergogen/v1',parts:{switch:{revision:'1',footprints:{base:{what:'linked'}}}},layout:{objects:{one:{kind:'key',part:'switch',pcb:'board'},two:{kind:'key',part:'switch',pcb:'board'}}},pcbs:{board:{}}};
     assert.equal(tools.countUses(source,'linked'),2);
     assert.equal(tools.countUses(source,'missing'),0);
 });

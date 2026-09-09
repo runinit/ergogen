@@ -1,7 +1,7 @@
 const m = require('makerjs')
 const kicad5 = require('../../src/templates/kicad5')
 const kicad8 = require('../../src/templates/kicad8')
-const ergogen = require('../../src/ergogen')
+const ergogen = require('../helpers/adapter-engine')
 
 describe('Internals', function() {
 

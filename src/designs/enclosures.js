@@ -233,7 +233,7 @@ exports.compile = async (config, context, options = {}) => {
                 const [low, high] = definition.height.map(v => g.number(v, `${name}.${ref}.height`, context.units))
                 const model = resolve(ref).model
                 features.push({id: ref, model, z: low, height: high - low})
-                const tool = kernel.extrude(model, high - low, low)
+                const tool = definition.native ? kernel.placeRigid(kernel.extrude(require('../native/geometry').shape(definition.native.envelope), definition.native.envelope.height[1]-definition.native.envelope.height[0], definition.native.envelope.height[0]), definition.native.matrix) : kernel.extrude(model, high - low, low)
                 bottom = kernel.cut(bottom, tool)
                 top = kernel.cut(top, tool)
             }
@@ -286,16 +286,18 @@ exports.compile = async (config, context, options = {}) => {
                 const definition = config.components[ref.split('.')[1]]
                 const [low, high] = definition.height.map(v => g.number(v, `${name}.${ref}.height`, context.units))
                 const model = resolve(ref).model
-                collision(definition.motion === 'floating' ? movement(model, low, high - low) : kernel.extrude(model, high - low, low), ref)
+                const body=definition.native?.envelope
+                const solid=body ? kernel.placeRigid(kernel.extrude(require('../native/geometry').shape(body),body.height[1]-body.height[0],body.height[0]),definition.native.matrix) : kernel.extrude(model, high-low,low)
+                collision(definition.motion === 'floating' ? movement(model, low, high-low) : solid,ref)
                 features.push({id: ref, model, z: low, height: high - low})
-                extras[ref.replace('.', '_')] = kernel.extrude(model, high - low, low)
+                extras[ref.replace('.', '_')] = solid
                 extraMotion[ref.replace('.', '_')] = definition.motion
             }
 
             const board = context.boards?.[id]
             for (const component of board?.components || []) {
                 activeFeature = `${name}.board.models.${component.id}`
-                const key=`components_board_${id}_${component.id.replace(/[^A-Za-z0-9_]/g,'_')}`
+                const key=board.native?`components_native_${component.id}`:`components_board_${id}_${component.id.replace(/[^A-Za-z0-9_]/g,'_')}`
                 if (!extras[key]) { continue }
                 const model = await require('./native-models').place(kernel, component, options.assets || {},
                     s.pcb_z + (component.side === 'top' ? board.thickness : 0), activeFeature)
@@ -303,7 +305,7 @@ exports.compile = async (config, context, options = {}) => {
             }
 
             // Rotate the complete mechanical stack, then trim the bottom to a flat datum.
-            const origin = [0, extents.low[1], 0]
+            const origin = s.native ? [0,0,0] : [0, extents.low[1], 0]
             const placed = {}
             for (const [part, solid] of Object.entries({...parts, ...extras})) {
                 placed[part] = kernel.move(kernel.rotate(solid, s.typing_angle, origin), [0, 0, lift])

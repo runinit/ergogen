@@ -1,0 +1,24 @@
+schema: ergogen/v1
+meta:
+  name: Imported PCB
+  note: Import a KiCad board named board.kicad_pcb before generating.
+layout:
+  objects: {}
+designs:
+  assemblies:
+    imported:
+      preset: enclosure
+      profile: profiles.__pcb_imported
+      board:
+        source: asset
+        name: board.kicad_pcb
+      mounting: bottom
+      wall: 3
+      floor: 2
+      height: 24
+      plate_z: 13
+      bezel: 10
+      fit: 0.5
+      ledge:
+        width: 2
+        thickness: 2

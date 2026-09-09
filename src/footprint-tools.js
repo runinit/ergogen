@@ -203,18 +203,10 @@ const envelope = (models, assets) => {
 }
 // Count placement declarations with the same preprocessing and filters as PCB generation.
 const countUses = (raw, alias) => {
-    const prepare = require('./prepare');
-    const config = prepare.parameterize(prepare.inherit(prepare.unnest(require('./io').interpret(raw,()=>{})[0])));
-    const units = require('./units').parse(config);
-    const points = config.points ? require('./points').parse(config.points,units) : {};
-    let count = 0;
-    for (const [board,spec] of Object.entries(config.pcbs || {})) {
-        for (const [name,fp] of Object.entries(spec.footprints || {})) {
-            if (fp.what !== alias) { continue; }
-            const path = `pcbs.${board}.footprints.${name}`;
-            count += require('./filter').parse(fp.where,`${path}.where`,points,units,require('./assert').asym(fp.asym || 'source',`${path}.asym`)).length;
-        }
-    }
-    return count;
+    const config = require('./native/document').parse(raw)
+    const scene = require('./native/layout').resolve(config)
+    return Object.values(scene.objects).filter(item => item.pcb).reduce((count,item) =>
+        count + Object.values(item.footprints).filter(binding => binding.what === alias).length, 0)
 }
+
 module.exports = {...api,convert,bind,modelPoint,envelope,countUses}

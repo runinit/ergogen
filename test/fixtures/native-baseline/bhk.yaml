@@ -1,0 +1,1001 @@
+meta:
+  engine: 5.0.0
+  name: blackholekeyboard
+  version: 0.1
+  author: runinit
+  url: https://github.com/runinit/blackholekeyboard
+
+presets:
+  choc_v1:
+    kx: cx
+    ky: cy
+    ks: 18.5
+    kp: 17.5
+    kcow: 13.8
+    kcoh: 13.8
+    keycw: 17.5
+    keych: 16.5
+    diode_shift_x: 5.7
+    diode_rotation: 180
+    switch_rotation: 180
+    led_shift_y: -5
+    choc_v1_support: true
+
+  choc_v2:
+    kx: u
+    ky: u
+    ks: 19
+    kp: 19
+    kcow: 14
+    kcoh: 14
+    keycw: 18
+    keych: 18
+    diode_shift_x: 5.7
+    diode_rotation: 180
+    switch_rotation: 180
+    led_shift_y: -5
+    choc_v1_support: false
+
+  mx:
+    kx: u
+    ky: u
+    ks: 19
+    kp: 19
+    kcow: 14
+    kcoh: 14
+    keycw: 18
+    keych: 18
+    #diode_shift_x: -6
+    diode_shift_x: 8
+    diode_shift_y: -6.3
+    diode_rotation: 90
+    switch_rotation: 180
+    led_shift_y: 5
+    choc_v1_support: false
+
+units:
+  $extends: presets.mx
+
+  # MCU dimensions (nice!nano / supermini)
+  mcu_x: 18
+  mcu_y: 33
+
+  # Display dimensions (nice!view)
+  display_x: 14
+  display_y: 36
+
+  # Physical measures
+  screw_radius: 1.1
+  spacer_radius: 2.05
+  fillet_radius: 1
+
+  # Gasket mount dimensions
+  gasket_width: 4 # Width of the gasket tab
+  gasket_length_lg: 55 # Large gasket length
+  gasket_length_md: 40 # Medium gasket length
+  gasket_length_sm: 25 # Small gasket length
+  gasket_length_1kx: 10 # 1 key gasket
+
+points:
+  key.tags:
+    - key
+  zones:
+    matrix:
+      anchor:
+        shift: [150, -150] # Fix KiCad placement
+      columns:
+        c1:
+          key:
+            width: 1.25 * kx
+            tags: [key_1_25u]
+            column_net: c1
+          rows:
+            r1:
+              led_prev: LED_6
+              led_next: LED_7
+            r2:
+              led_prev: LED_7
+              led_next: LED_8
+            r3:
+              led_prev: LED_19
+              led_next: LED_20
+            r4:
+              led_prev: LED_20
+              led_next: LED_21
+            r5.skip: true
+            # r5:
+            #   width: kx
+            #   tags: [key]
+            #   led_prev: LED_26
+            #   led_next: LED_27
+            #   adjust:
+            #     shift: [0.125 * kx, 0]
+        c2:
+          key:
+            spread: 1.125 * kx
+            column_net: c2
+          rows:
+            r1:
+              led_prev: LED_5
+              led_next: LED_6
+            r2:
+              led_prev: LED_8
+              led_next: LED_9
+            r3:
+              led_prev: LED_18
+              led_next: LED_19
+            r4:
+              led_prev: LED_21
+              led_next: LED_22
+            r5:
+              skip: true
+              led_prev: LED_27
+              led_next: LED_28
+        c3:
+          key:
+            stagger: ky/4
+            column_net: c3
+          rows:
+            r1:
+              led_prev: LED_4
+              led_next: LED_5
+            r2:
+              led_prev: LED_9
+              led_next: LED_10
+            r3:
+              led_prev: LED_17
+              led_next: LED_18
+            r4:
+              led_prev: LED_22
+              led_next: LED_23
+            r5:
+              led_prev: LED_32
+              led_next: LED_END
+        c4:
+          key:
+            stagger: ky/8
+            column_net: c4
+          rows:
+            r1:
+              led_prev: LED_3
+              led_next: LED_4
+            r2:
+              led_prev: LED_10
+              led_next: LED_11
+            r3:
+              led_prev: LED_16
+              led_next: LED_17
+            r4:
+              led_prev: LED_23
+              led_next: LED_24
+            r5:
+              led_prev: LED_31
+              led_next: LED_32
+        c5:
+          key:
+            stagger: -ky/8
+            column_net: c5
+          rows:
+            r1:
+              led_prev: LED_2
+              led_next: LED_3
+            r2:
+              led_prev: LED_11
+              led_next: LED_12
+            r3:
+              led_prev: LED_15
+              led_next: LED_16
+            r4:
+              led_prev: LED_24
+              led_next: LED_25
+            r5.skip: true
+        c6:
+          key:
+            stagger: -ky/4
+            column_net: c6
+          rows:
+            r1:
+              led_prev: LED_1
+              led_next: LED_2
+            r2:
+              led_prev: LED_12
+              led_next: LED_13
+            r3:
+              led_prev: LED_14
+              led_next: LED_15
+            r4:
+              led_prev: LED_25
+              led_next: LED_26
+            r5.skip: true
+
+        c7:
+          key:
+            stagger: -ky/2
+            column_net: c7
+          rows:
+            r1:
+              led_prev: DOUT
+              led_next: LED_1
+            r2:
+              width: 1.5 * kx
+              tags: [key_1_5u]
+              led_prev: LED_13
+              led_next: LED_14
+              adjust:
+                shift: [0, -0.25 * kx]
+            r5.skip: true
+            r4.skip: true
+            r3.skip: true
+      rows:
+        r5:
+          row_net: r5
+        r4:
+          row_net: r4
+        r3:
+          row_net: r3
+        r2:
+          row_net: r2
+        r1:
+          row_net: r1
+
+    thumbfan:
+      anchor:
+        - ref: matrix_c5_r4
+          shift: [.5 * kx, -1.250 * ky]
+      columns:
+        c1:
+          key:
+            width: 1.25 * kx
+            splay: -15
+            tags: [key_1_25u]
+          rows:
+            r2:
+              led_prev: LED_30
+              led_next: LED_31
+              column_net: c5
+              row_net: r5
+            r1.skip: true
+
+        c2:
+          key:
+            splay: -15
+            stagger: -ky/4
+            spread: 1.2 * kx
+          rows:
+            r2:
+              led_prev: LED_29
+              led_next: LED_30
+              column_net: c7
+              row_net: r4
+            r1:
+              width: 1.5 * kx
+              tags: [key_1_5u]
+              led_prev: LED_26
+              led_next: LED_27
+              column_net: c6
+              row_net: r5
+              adjust:
+                shift: [0, 0.25 * kx]
+        c3:
+          rows:
+            r2:
+              led_prev: LED_28
+              led_next: LED_29
+              column_net: c8
+              row_net: r4
+            r1:
+              width: 1.5 * kx
+              tags: [key_1_5u]
+              led_prev: LED_27
+              led_next: LED_28
+              column_net: c8
+              row_net: r5
+              adjust:
+                shift: [0, 0.25 * kx]
+      rows:
+        r2:
+        r1:
+
+    mcu:
+      key.tags:
+        - helper
+      anchor:
+        - ref: matrix_c6_r1
+          shift: [1.5 * kx + mcu_x/2 + 1.6, ky/2 - mcu_y/2]
+
+    display:
+      key.tags:
+        - helper
+      anchor:
+        - ref: mcu
+          shift: [0, -3.5]
+
+    scrollwheel:
+      key:
+        tags:
+          - helper
+        column_net: c8
+        row_net: r3
+      anchor:
+        - ref: display
+          shift: [0, -1.75 * ky]
+
+    corne_screw_1:
+      key.tags: [helper, corne_screw]
+      anchor.aggregate.parts:
+        - ref: matrix_c1_r1
+        - ref: matrix_c2_r1
+        - ref: matrix_c1_r2
+        - ref: matrix_c2_r2
+          shift: [0, -ky/2]
+
+    corne_screw_2:
+      key.tags: [helper, corne_screw]
+      anchor.aggregate.parts:
+        - ref: matrix_c5_r1
+        - ref: matrix_c5_r2
+        - ref: matrix_c6_r1
+        - ref: matrix_c6_r2
+          shift: [0, -ky/2]
+
+    corne_screw_3:
+      key.tags: [helper, corne_screw]
+      anchor.aggregate.parts:
+        - ref: matrix_c1_r4
+        - ref: matrix_c2_r4
+        - ref: matrix_c1_r3
+        - ref: matrix_c2_r3
+          shift: [0, -ky/2]
+
+    corne_screw_4:
+      key.tags: [helper, corne_screw]
+      anchor.aggregate.parts:
+        - ref: matrix_c5_r3
+        - ref: matrix_c5_r4
+        - ref: matrix_c6_r3
+        - ref: matrix_c6_r4
+          shift: [0, -ky/2]
+
+    corne_screw_5:
+      key.tags: [helper, corne_screw]
+      anchor:
+        aggregate.parts:
+          - ref: thumbfan_c2_r2
+          - ref: thumbfan_c3_r2
+        shift: [0, 9.5]
+
+    corne_screw_6:
+      key.tags: [helper, corne_screw]
+      anchor:
+        aggregate.parts:
+          - ref: thumbfan_c1_r2
+          - ref: matrix_c4_r5
+        shift: [0, ky/4]
+
+    # Gasket mount tabs around perimeter
+    # Size tags: gasket_lg (55mm), gasket_md (40mm), gasket_sm (30mm), gasket_1kx (15mm)
+    gasket_mount_left:
+      key.tags: [helper, gasket_mount, gasket_vertical, gasket_lg]
+      anchor:
+        aggregate.parts: [matrix_c1_r1, matrix_c1_r4]
+        shift: [-1.25 * kx/2 - 2, 0]
+
+    gasket_mount_top_left:
+      key.tags: [helper, gasket_mount, gasket_horizontal, gasket_sm]
+      anchor:
+        aggregate.parts: [matrix_c1_r1, matrix_c2_r1]
+        shift: [0, 0.5 * ky + 2]
+
+    gasket_mount_top_centre:
+      key.tags: [helper, gasket_mount, gasket_horizontal, gasket_1kx]
+      anchor:
+        ref: matrix_c4_r1
+        shift: [0, 0.5 * ky + 2]
+
+    gasket_mount_top_right:
+      key.tags: [helper, gasket_mount, gasket_horizontal, gasket_1kx]
+      anchor:
+        ref: matrix_c6_r1
+        shift: [0, 0.5 * ky + 2]
+
+    gasket_mount_right:
+      key.tags: [helper, gasket_mount, gasket_vertical, gasket_md]
+      anchor:
+        ref: mcu
+        shift: [mcu_x/2 + 2, -mcu_y/2]
+
+    gasket_mount_bottom_left:
+      key.tags: [helper, gasket_mount, gasket_horizontal, gasket_sm]
+      anchor:
+        aggregate.parts: [matrix_c1_r5, matrix_c2_r5]
+        shift: [0, -ky/2-2]
+
+    gasket_mount_bottom_centre:
+      key.tags: [helper, gasket_mount, gasket_horizontal, gasket_sm]
+      anchor:
+        aggregate.parts: [matrix_c3_r5, matrix_c5_r5]
+        shift: [0, -ky/2-2]
+
+    gasket_mount_thumbfan_bottom:
+      key.tags: [helper, gasket_mount, gasket_horizontal, gasket_sm]
+      anchor:
+        aggregate.parts: [thumbfan_c2_r1, thumbfan_c3_r1]
+        shift: [0, -1.75 * ky - 2]
+
+    gasket_mount_thumbfan_right:
+      key.tags: [helper, gasket_mount, gasket_vertical, gasket_sm]
+      anchor:
+        aggregate.parts: [thumbfan_c3_r1, thumbfan_c3_r2]
+        shift: [kx/2+2, 0]
+
+outlines:
+  _keycaps:
+    - what: rectangle
+      where: [key]
+      size: keycw
+      fillet: 3
+    - what: rectangle
+      where: [key_1_25u]
+      size: [keycw * 1.25, keych]
+      fillet: 3
+    - what: rectangle
+      where: [key_1_5u]
+      size: [keycw, keych * 1.5]
+      fillet: 3
+
+  _mcu:
+    - what: rectangle
+      where: [mcu]
+      size: [17.78, mcu_y]
+      fillet: 1
+    - what: rectangle
+      where: [mcu]
+      size: [8.94, 7.35]
+      fillet: 0.1
+      operation: stack
+      adjust:
+        shift: [0, mcu_y/2 - 7.35/2 + 0.7]
+
+  _thqwgd001c:
+    # 1. Main Body
+    - what: rectangle
+      where: [scrollwheel]
+      size: [19, 19]
+      fillet: 0.5
+
+    # 2. Connector / Side Pins
+    - what: rectangle
+      where: [scrollwheel]
+      size: [4, 6]
+      operation: stack
+      adjust:
+        shift: [-6.35, 0]
+
+    # 3. Screen / Active Area
+    - what: rectangle
+      where: [scrollwheel]
+      size: [14, 14]
+      operation: stack
+
+  _display:
+    - what: rectangle
+      where: [display]
+      size: [display_x, display_y]
+      fillet: 0.5
+    - what: rectangle
+      where: [display]
+      size: [12.82, 2.66]
+      operation: stack
+      fillet: 0.1
+      adjust:
+        shift: [0, -16.7]
+    - what: rectangle
+      where: [display]
+      size: [10.8, 24.6]
+      operation: stack
+      adjust:
+        shift: [0, -0.75]
+
+  _mcu_cluster:
+    - what: outline
+      name: _mcu
+      operation: stack
+    - what: outline
+      name: _display
+      operation: stack
+
+  _corne_screw_heads:
+    - what: circle
+      where: [corne_screw]
+      radius: 4.3/2
+
+  _gasket_mounts:
+    # Vertical gaskets - large (55mm)
+    - what: rectangle
+      where: [[gasket_vertical, gasket_lg]]
+      size: [gasket_width, gasket_length_lg]
+      operation: stack
+    # Vertical gaskets - medium (45mm)
+    - what: rectangle
+      where: [[gasket_vertical, gasket_md]]
+      size: [gasket_width, gasket_length_md]
+      operation: stack
+    # Vertical gaskets - small (35mm)
+    - what: rectangle
+      where: [[gasket_vertical, gasket_sm]]
+      size: [gasket_width, gasket_length_sm]
+      operation: stack
+    # Horizontal gaskets - large (55mm)
+    - what: rectangle
+      where: [[gasket_horizontal, gasket_lg]]
+      size: [gasket_length_lg, gasket_width]
+      operation: stack
+    # Horizontal gaskets - medium (45mm)
+    - what: rectangle
+      where: [[gasket_horizontal, gasket_md]]
+      size: [gasket_length_md, gasket_width]
+      operation: stack
+    # Horizontal gaskets - small (35mm)
+    - what: rectangle
+      where: [[gasket_horizontal, gasket_sm]]
+      size: [gasket_length_sm, gasket_width]
+      operation: stack
+    # Horizontal gaskets - 1kx (15mm)
+    - what: rectangle
+      where: [[gasket_horizontal, gasket_1kx]]
+      size: [gasket_length_1kx, gasket_width]
+      operation: stack
+
+  # Modular sub-outlines for bhk
+  _matrix:
+    - what: rectangle
+      where: [[/matrix/, key]]
+      size: [kx, ky]
+    - what: rectangle
+      where: [[/matrix/, key_1_25u]]
+      size: [kx * 1.25, ky]
+    - what: rectangle
+      where: [[/matrix/, key_1_5u]]
+      size: [kx, ky * 1.5]
+
+  _thumbfan:
+    - what: rectangle
+      where: [[/thumbfan/, key]]
+      size: kx
+      bound: true
+    - what: rectangle
+      where: [[/thumbfan/, key_1_25u]]
+      size: [kx * 1.25, ky]
+      bound: true
+    - what: rectangle
+      where: [[/thumbfan/, key_1_5u]]
+      size: [kx, ky * 1.5]
+      bound: true
+
+  _mcu_area:
+    - what: rectangle
+      where: [mcu]
+      size: [mcu_x, mcu_y]
+    - what: rectangle
+      where: [display]
+      size: [mcu_x, display_y]
+
+  _bridge:
+    # 0.5kx bridge above col7
+    - what: rectangle
+      where: [matrix_c7_r1]
+      size: [kx + mcu_x + 2.2, ky]
+      adjust.shift: [0.5 * kx, 0.5 * ky]
+    # Bridge from thumbfan to MCU
+    - what: rectangle
+      where: [mcu]
+      size: [3 * mcu_x, 3 * ky]
+      operation: add
+      adjust:
+        shift: [-mcu_x, -display_y/1.5]
+
+  _thumb_bridge:
+    - what: polygon
+      points:
+        - ref: matrix_c3_r5
+          shift: [kx/2, -ky/2]
+        - ref: matrix_c3_r5
+          shift: [kx/2, ky/2]
+        - ref: mcu
+          shift: [mcu_x/2, mcu_y/2]
+
+        # - ref: mcu
+        #   shift: [mcu_x/2,-3.2ky]
+        - ref: thumbfan_c3_r1
+          shift: [kx/2, 1.5 * kx/2]
+        - ref: thumbfan_c2_r2
+          shift: [-kx/2, -ky/2]
+        - ref: thumbfan_c1_r2
+          shift: [-1.25 * kx/2, -ky/2]
+
+  bhk:
+    - what: outline
+      name: _matrix
+    - what: outline
+      name: _thumbfan
+      operation: add
+    - what: outline
+      name: _bridge
+      operation: add
+    - what: outline
+      name: _mcu_area
+      operation: add
+    - what: outline
+      name: _thumb_bridge
+
+  bhk_plate:
+    - what: outline
+      name: _matrix
+    - what: outline
+      name: _thumbfan
+      operation: add
+    - what: outline
+      name: _bridge
+      operation: add
+    - what: outline
+      name: _mcu_area
+      operation: add
+    - what: outline
+      name: _gasket_mounts
+      operation: add
+
+  bhk_auto:
+    - what: rectangle
+      where: [key, key_1_25u, key_1_5u]
+      size: [kx, ky]
+      bound: true
+      #autobind: 10    # Default value, increase if gaps remain
+    - what: rectangle
+      where: [mcu]
+      size: [mcu_x, mcu_y]
+      bound: true
+    - what: rectangle
+      where: [display]
+      size: [mcu_x, display_y]
+      bound: true
+
+  preview:
+    - what: outline
+      name: bhk
+      operation: stack
+    - what: outline
+      name: _keycaps
+      operation: stack
+    - what: outline
+      name: _mcu_cluster
+      operation: stack
+    - what: outline
+      name: _thqwgd001c
+      operation: stack
+    # - what: outline
+    #   name: _corne_screw_heads
+    #   operation: add
+    # - what: outline
+    #   name: _gasket_mounts
+    #   operation: add
+
+pcbs:
+  bhk_pcb:
+    template: kicad8
+    outlines:
+      board:
+        outline: bhk
+
+    footprints:
+      m2_screws:
+        what: ceoloide/mounting_hole_plated
+        where: /corne_screw/
+        params:
+          outline: 1.2
+          drill: 2.2
+
+      switches:
+        what: ceoloide/switch_mx
+        where: [[/matrix|thumbfan/, -helper]]
+        params:
+          from: "{{column_net}}"
+          to: "{{column_net}}_{{row_net}}"
+          hotswap: true
+          reversible: true
+          include_traces_vias: false
+          hotswap_pads_same_side: true
+          include_plated_holes: true
+          include_stabilizer_nets: true
+          include_centerhole_net: true
+          RIGHTSTAB: "{{column_net}}"
+          LEFTSTAB: "{{colrow}}"
+        adjust:
+          rotate: switch_rotation
+
+      routes_switches:
+        what: ceoloide/utility_router
+        where: [[/matrix|thumbfan/, -helper]]
+        params:
+          locked: false
+          routes:
+            - "B(5.842,-5.08)(5.842,-0.762)(5.08,-0)"
+            - "F(-6.371,-1.291)(-5.08,0)(-6.371,-1.291)(-6.371,-4.551)(-6.371,-1.291)"
+            - "B(-5.08,0)(-6.076,0)(-7.085,-1.009)(-7.085,-2.54)(-7.085,-1.009)(-6.076,0)(-5.08,0)"
+        adjust:
+          rotate: switch_rotation
+
+      diodes:
+        what: ceoloide/diode_tht_sod123
+        where: [[/matrix|thumbfan/, -helper]]
+        params:
+          from: "{{column_net}}_{{row_net}}"
+          to: "{{row_net}}"
+          reversible: true
+          include_traces_vias: false
+        adjust:
+          shift: [diode_shift_x, diode_shift_y]
+          rotate: diode_rotation
+
+      routes_diodes:
+        what: ceoloide/utility_router
+        where: [[/matrix|thumbfan/, -helper]]
+        params:
+          locked: false
+          routes:
+            - "(-1.65,-1.143)VF(-1.65,0)B(-1.65,-1.143)" # net: r1
+            - "F(1.65,-0)(1.65,-1.728)(1.22,-2.158)(1.749,-1.629)(5.009,-1.629)(6.3,-2.92)B(6.3,-1.924)(5.291,-0.915)(3.76,-0.915)(2.718,0.127)(1.777,0.127)(1.65,-0)" # net: c1_r1
+        adjust:
+          shift: [diode_shift_x, diode_shift_y]
+          rotate: diode_rotation
+
+      mcu:
+        what: ceoloide/mcu_supermini_nrf52840
+        where: mcu
+        params:
+          reversible: true
+          reverse_mount: false
+          only_required_jumpers: false
+          use_rectangular_jumpers: true
+          P1: "DOUT"
+          P0: "c7"
+          P2: "r1"
+          P3: "c2"
+          P4: "c3"
+          P5: "c4"
+          P6: "c5"
+          P7: "c6"
+          P8: "c8"
+          P9: "DA"
+
+          P21: "c6"
+          P20: ""
+          P19: "r1"
+          P18: "c6"
+          P14: "r2"
+          P16: "c5"
+          P10: "r3"
+
+      display:
+        what: ceoloide/display_nice_view
+        where: display
+        params:
+          reversible: true
+          invert_jumpers_position: true
+          MOSI: "DA"
+          SCK: "CL"
+
+      scrollwheel:
+        what: bhkfp/thqwgd001c
+        where: scrollwheel
+        params:
+          reversible: true
+          P1: GND
+          P2: GND
+          P3: P20
+        adjust:
+          rotate: 0
+
+      routes_scrollwheel:
+        what: ceoloide/utility_router
+        where: scrollwheel
+        params:
+          locked: false
+          routes:
+            - "B(-4.9,-2.4892)(-6.3122,-2.4892)V(-7.7892,-2.4892)(-7.8,-2.5)" # net: GND
+            - "B(-4.9,0)(-6.3122,0)V(-7.8,0)" # net: SCL
+            - "B(-4.9508,2.4892)(-6.363,2.4892)V(-7.7892,2.4892)(-7.8,2.5)" # net: P20
+            - "B(9.75,2.25)(6.6566,2.25)(6.6418,2.2352)V(3.2648,2.2352)(3.25,2.25)" # net: GND
+            - "B(9.7633,-2.1844)(6.6699,-2.1844)(6.6551,-2.1992)V(3.2781,-2.1992)(3.2633,-2.1844)" # net: GND
+        adjust:
+          rotate: 0
+
+      diode_scrollwheel:
+        what: ceoloide/diode_tht_sod123
+        where: scrollwheel
+        params:
+          from: "{{column_net}}_{{row_net}}"
+          to: "{{row_net}}"
+          reversible: true
+          include_traces_vias: false
+        adjust:
+          shift: [diode_shift_x-4, diode_shift_y]
+          rotate: diode_rotation
+
+      battery_connector:
+        what: ceoloide/battery_connector_jst_ph_2
+        where: scrollwheel
+        params:
+          reversible: true
+          side: B
+        adjust:
+          shift: [-kx/1.65, -ky/3]
+          rotate: -90
+
+      on_off_switch:
+        what: ceoloide/power_switch_smd_side
+        where: matrix_c7_r1
+        params:
+          from: BAT_P
+          to: RAW
+          reversible: true
+        adjust:
+          shift: [kx/4, ky-1.5]
+          rotate: 90
+
+      routes_on_off_switch:
+        what: ceoloide/utility_router
+        where: matrix_c7_r1
+        params:
+          locked: false
+          routes:
+            - "B(-1.735,0.75)(-1.57926,0.59426)(-0.60209,0.59426)(-0.04329,0.03546)V(-0.82875,-0.75)(-1.735,-0.75)" # net: RAW
+            - "B(-0.62275,2.25)(-1.735,2.25)" # net: BAT_P
+            - "B(0.00751,2.88026)(-0.62275,2.25)" # net: BAT_P
+            - "(0.00751,3.64226)VB(0.00751,2.88026)F(0.00751,3.64226)" # net: BAT_P
+            - "F(0.00751,2.88026)(-0.62275,2.25)(-1.735,2.25)" # net: BAT_P
+        adjust:
+          shift: [kx/4, ky-1.425]
+          rotate: 90
+
+      reset_switch:
+        what: ceoloide/reset_switch_smd_side
+        where: matrix_c7_r1
+        params:
+          reversible: true
+          include_bosses: true
+        adjust:
+          shift: [-kx/2.5, ky/1.1]
+          rotate: 0
+
+      routes_reset_switch:
+        what: ceoloide/utility_router
+        where: matrix_c7_r1
+        params:
+          locked: false
+          routes:
+            - "F(-2.625,-0.85)(-2.117,-0.342)(-1.69,-0.342)(-1.1684,-0.8636)V(-0.6468,-0.342)(2.117,-0.342)(2.625,-0.85)" # net: GND
+            - "F(-1.1684,-0.8636)(-0.6468,-0.342)(2.117,-0.342)(2.625,-0.85)" # net: GND
+            - "F(-2.625,0.85)(-2.22756,0.45256)(0.30016,0.45256)(1.016,1.1684)V(1.73184,0.45256)(2.22756,0.45256)(2.625,0.85)" # net: RST
+            - "F(1.016,1.1684)(1.73184,0.45256)(2.22756,0.45256)(2.625,0.85)" # net: RST
+        adjust:
+          shift: [-kx/2.5, ky/1.1]
+          rotate: 0
+
+      leds:
+        what: ceoloide/led_sk6812mini-e
+        where: [[/matrix/, /key/, "/r[024]/"], [/thumbfan/, /key/, /r1/]]
+        params:
+          include_traces_vias: false
+          reversible: true
+          P1: VCC
+          P2: "{{led_next}}"
+          P3: GND
+          P4: "{{led_prev}}"
+          side: B
+        adjust:
+          shift: [0, led_shift_y]
+
+      routes_leds:
+        what: ceoloide/utility_router
+        where: [[/matrix/, /key/, "/r[024]/"], [/thumbfan/, /key/, /r1/]]
+        params:
+          locked: false
+          routes:
+            - "F(0,5)(-2.7,2.3)(-2.7,0.7)(-4.06,0.7)V(-4.06,-0.10592)(-3.4,-0.7)(-2.7,-0.7)(-2.7,-1.65)(-1.975,-2.375)V(-0.775,-2.375)B(-1.975,-2.375)" # net: GND
+            - "F(2.7,-0.7)(3.4,-0.7)(4.06,-0.10592)(4.06,0.7)V(2.7,0.7)" # net: VCC
+            - "F(2.7,-1.65)(2.7,-0.7)" # net: VCC
+            - "(1.975,-2.375)VF(2.7,-1.65)" # net: VCC
+            - "F(0.775,-2.375)(1.975,-2.375)B(0.775,-2.375)" # net: VCC
+            - "(4.95,-0.7)VB(2.7,-0.7)" # net: LED_13
+            - "F(4.95,1.06)(4.95,-0.7)" # net: LED_13
+            - "F(4.529,1.485)(4.95,1.06)" # net: LED_13
+            - "F(3.481,1.485)(4.529,1.485)" # net: LED_13
+            - "F(2.7,0.7)(3.481,1.485)" # net: LED_13
+            - "(-4.95,-0.7)VF(-2.7,-0.7)" # net: LED_12
+            - "B(-4.95,1.06)(-4.95,-0.7)" # net: LED_12
+            - "B(-4.529,1.485)(-4.95,1.06)" # net: LED_12
+            - "B(-3.481,1.485)(-4.529,1.485)" # net: LED_12
+            - "B(-2.7,0.7)(-3.481,1.485)" # net: LED_12
+        adjust:
+          shift: [0, led_shift_y]
+
+      led_caps:
+        what: bhkfp/cap_0603
+        where: [[/matrix/, /key/, "/r[024]/"], [/thumbfan/, /key/, /r1/]]
+        params:
+          reversible: true
+          include_traces_vias: false
+          to: VCC
+          from: GND
+          side: B
+        adjust:
+          shift: [0, led_shift_y+ky/8]
+
+      leds_rotated:
+        what: ceoloide/led_sk6812mini-e
+        where: [[/matrix/, /key/, "/r[135]/"], [/thumbfan/, /key/, /r2/]]
+        params:
+          reversible: true
+          P1: VCC
+          P2: "{{led_next}}"
+          P3: GND
+          P4: "{{led_prev}}"
+          side: B
+          include_traces_vias: false
+        adjust:
+          shift: [0, led_shift_y]
+          rotate: 180
+
+      routes_leds_rotated:
+        what: ceoloide/utility_router
+        where: [[/matrix/, /key/, "/r[135]/"], [/thumbfan/, /key/, /r2/]]
+        params:
+          locked: false
+          routes:
+            - "F(-0,-5)(-1.143,-5)(-1.397,-4.746)(-2.286,-4.746)(-5.551,-1.481)(-5.551,-0.10353)(-4.74747,0.7)(-4.06,0.7)V" # net: GND
+            - "B(-4.1148,0.6452)(-4.1148,0.0148)(-3.4,-0.7)(-2.7,-0.7)" # net: GND
+            - "B(-4.06,0.7)(-4.1148,0.6452)" # net: GND
+            - "F(-4.06,0.7)(-2.7,0.7)(-2.7,1.65)(-1.975,2.375)V(-0.775,2.375)F(-1.975,2.375)" # net: GND
+            - "(-4.572,-0.7)VF(-2.7,-0.7)" # net: DOUT
+            - "B(-4.572,-0.7)(-4.686,-0.586)(-4.686,0.982)(-4.2672,1.4008)(-3.4008,1.4008)(-2.7,0.7)" # net: DOUT
+            - "F(3.4,-0.7)(4.06,-0.10592)(4.06,0.7)V(2.7,0.7)(2.7,1.65)(1.975,2.375)V(0.775,2.375)B(1.975,2.375)" # net: VCC
+            - "F(2.7,-0.7)(3.4,-0.7)" # net: VCC
+            - "F(2.7,0.7)(3.481,1.485)(4.529,1.485)(4.95,1.06)(4.95,-0.7)V(2.7,-0.7)" # net: LED_1
+        adjust:
+          shift: [0, led_shift_y]
+          rotate: 180
+
+      led_caps_rotated:
+        what: bhkfp/cap_0603
+        where: [[/matrix/, /key/, "/r[135]/"], [/thumbfan/, /key/, /r2/]]
+        params:
+          reversible: true
+          include_traces_vias: false
+          to: VCC
+          from: GND
+          side: B
+        adjust:
+          shift: [0, led_shift_y+ky/8]
+          rotate: 180
+
+      routes_switch_col:
+        what: ceoloide/utility_router
+        where:
+          - [/matrix/, /r1/, -helper]
+          - [/matrix/, /r2/, -helper, -matrix_c7_r2]
+          - [/matrix/, /r3/, -helper]
+          - [/matrix/, matrix_c3_r4]
+          - [/matrix/, matrix_c4_r4]
+          - [/thumbfan/, thumbfan_c2_r1]
+          - [/thumbfan/, thumbfan_c3_r1]
+        params:
+          locked: false
+          routes:
+            - "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)"
+        adjust:
+          rotate: switch_rotation
+      
+      zone_gnd:
+        what: ceoloide/utility_filled_zone
+        params:
+          locked: false

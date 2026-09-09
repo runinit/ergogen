@@ -186,7 +186,8 @@ fs.mkdirpSync(args.o)
 single(results.raw, 'source/raw.txt')
 single(results.canonical, 'source/canonical.yaml')
 
-single(results.units, 'points/units.yaml')
+single(results.layout, 'layout/layout.yaml')
+single(results.units, 'layout/units.yaml')
 single(results.points, 'points/points.yaml')
 composite(results.demo, 'points/demo')
 

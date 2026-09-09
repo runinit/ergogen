@@ -1,4 +1,4 @@
-const engine = require('../../src/ergogen')
+const engine = require('../helpers/adapter-engine')
 const sketch = () => ({points: {
     origin: {at: [0, 0], fixed: true}, end: {at: [12, 3]}
 }, geometry: {edge: {type: 'line', points: ['origin', 'end'], construction: true}}, constraints: {

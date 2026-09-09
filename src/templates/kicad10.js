@@ -78,7 +78,7 @@ module.exports = {
         }).join('\n')
         return `(kicad_pcb (version ${FORMAT_VERSION})
 (generator "ergogen") (generator_version ${sexpr.quote(version)})
-(general (thickness 1.6)) (paper "A3")
+(general (thickness ${params.thickness ?? 1.6})) (paper "A3")
 (title_block (title ${sexpr.quote(params.name)}) (rev ${sexpr.quote(params.version)}) (company ${sexpr.quote(params.author)}))
 (layers ${layers.map(([id, name, type = 'user']) => `(${id} ${sexpr.quote(name)} ${type})`).join('\n')})
 (setup (pad_to_mask_clearance 0.05) (allow_soldermask_bridges_in_footprints no))

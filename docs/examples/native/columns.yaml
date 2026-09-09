@@ -1,0 +1,110 @@
+schema: ergogen/v1
+meta:
+  name: Columns
+units:
+  pitch: 19
+parts:
+  mx:
+    revision: "1"
+    envelopes:
+      pcb:
+        size:
+          - 18
+          - 18
+      plate:
+        size:
+          - 14
+          - 14
+      body:
+        size:
+          - 14
+          - 14
+        height:
+          - 0
+          - 11.6
+    footprints:
+      switch:
+        what: mx
+        params:
+          from: "{{column_net}}"
+          to: "{{row_net}}"
+layout:
+  layers:
+    switches:
+      surface: pcb.main.top
+  clusters:
+    fingers:
+      layer: switches
+      arrangement:
+        type: columns
+        columns:
+          - outer
+          - inner
+        rows:
+          - home
+          - top
+        pitch:
+          - pitch
+          - pitch
+        stagger:
+          inner: 3
+  objects:
+    outer_home:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - outer
+        - home
+      properties:
+        column_net: outer
+        row_net: home
+    outer_top:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - outer
+        - top
+      properties:
+        column_net: outer
+        row_net: top
+    inner_home:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - inner
+        - home
+      properties:
+        column_net: inner
+        row_net: home
+    inner_top:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: fingers
+      cell:
+        - inner
+        - top
+      properties:
+        column_net: inner
+        row_net: top
+designs:
+  regions:
+    keys:
+      select:
+        kind: key
+      envelope: pcb
+      close: 2
+  profiles:
+    board:
+      from: regions.keys
+      clearance: 2
+pcbs:
+  main:
+    profile: profiles.board
+    thickness: 1.6

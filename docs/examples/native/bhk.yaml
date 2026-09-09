@@ -1,0 +1,1068 @@
+# BHK native layout. Shared hardware lives in parts; objects carry placement and wiring.
+# Dimensions and socket assumptions: docs/component-dimensions.md.
+
+schema: ergogen/v1
+meta:
+  name: BHK
+  author: runinit
+  version: native-1
+  mechanical_note: PCB and component XY placement retained. Nice!view uses its published 2.9 mm module and supplied 7 mm socket stack. Confirm installed sockets; MCU, wheel and battery envelopes remain unresolved.
+  mechanical_sources: { nice_view: https://nicekeyboards.com/nice-view/, wheel: https://github.com/Taro-Hayashi/THQWGD001, controller: https://wiki.icbbuy.com/doku.php?id=developmentboard:nrf52840 }
+units:
+  U: 19.05
+  u: 19
+  cx: 18
+  cy: 17
+  kx: 19
+  ky: 19
+  ks: 19
+  kp: 19
+  kcow: 14
+  kcoh: 14
+  keycw: 18
+  keych: 18
+  diode_shift_x: 8
+  diode_shift_y: -6.3
+  diode_rotation: 90
+  switch_rotation: 180
+  led_shift_y: 5
+  choc_v1_support: 0
+  mcu_x: 18
+  mcu_y: 33
+  display_x: 14
+  display_y: 36
+  display_body_height: 2.9
+  display_socket_height: 7
+  screw_radius: 1.1
+  spacer_radius: 2.05
+  fillet_radius: 1
+  gasket_width: 4
+  gasket_length_lg: 55
+  gasket_length_md: 40
+  gasket_length_sm: 25
+  gasket_length_1kx: 10
+parts:
+  key:
+    revision: bhk-layout-v1
+    envelopes:
+      pcb: { size: [ 18, 18 ] }
+      plate: { size: [ 14, 14 ] }
+      body: { size: [ 14, 14 ], height: [ 0, 11.6 ] }
+      keycap: { size: [ 18, 18 ] }
+    footprints:
+      switches:
+        what: ceoloide/switch_mx
+        params:
+          from: "{{column_net}}"
+          to: "{{column_net}}_{{row_net}}"
+          hotswap: true
+          reversible: true
+          include_traces_vias: false
+          hotswap_pads_same_side: true
+          include_plated_holes: true
+          include_stabilizer_nets: true
+          include_centerhole_net: true
+          RIGHTSTAB: "{{column_net}}"
+          LEFTSTAB: "{{colrow}}"
+        placement: { at: [ 0, 0, 0 ], rotate: 180 }
+      routes_switches:
+        what: ceoloide/utility_router
+        params:
+          locked: false
+          routes: [ "B(5.842,-5.08)(5.842,-0.762)(5.08,-0)", "F(-6.371,-1.291)(-5.08,0)(-6.371,-1.291)(-6.371,-4.551)(-6.371,-1.291)", "B(-5.08,0)(-6.076,0)(-7.085,-1.009)(-7.085,-2.54)(-7.085,-1.009)(-6.076,0)(-5.08,0)" ]
+        placement: { at: [ 0, 0, 0 ], rotate: 180 }
+      diodes:
+        what: ceoloide/diode_tht_sod123
+        params: { from: "{{column_net}}_{{row_net}}", to: "{{row_net}}", reversible: true, include_traces_vias: false }
+        placement: { at: [ 8, -6.300000000000011, 0 ], rotate: 90 }
+      routes_diodes:
+        what: ceoloide/utility_router
+        params:
+          locked: false
+          routes: [ "(-1.65,-1.143)VF(-1.65,0)B(-1.65,-1.143)", "F(1.65,-0)(1.65,-1.728)(1.22,-2.158)(1.749,-1.629)(5.009,-1.629)(6.3,-2.92)B(6.3,-1.924)(5.291,-0.915)(3.76,-0.915)(2.718,0.127)(1.777,0.127)(1.65,-0)" ]
+        placement: { at: [ 8, -6.300000000000011, 0 ], rotate: 90 }
+      leds:
+        what: ceoloide/led_sk6812mini-e
+        params: { include_traces_vias: false, reversible: true, P1: VCC, P2: "{{led_next}}", P3: GND, P4: "{{led_prev}}", side: B }
+        placement: { at: [ 0, 5, 0 ], rotate: 0 }
+      routes_leds:
+        what: ceoloide/utility_router
+        params:
+          locked: false
+          routes:
+            - F(0,5)(-2.7,2.3)(-2.7,0.7)(-4.06,0.7)V(-4.06,-0.10592)(-3.4,-0.7)(-2.7,-0.7)(-2.7,-1.65)(-1.975,-2.375)V(-0.775,-2.375)B(-1.975,-2.375)
+            - F(2.7,-0.7)(3.4,-0.7)(4.06,-0.10592)(4.06,0.7)V(2.7,0.7)
+            - F(2.7,-1.65)(2.7,-0.7)
+            - (1.975,-2.375)VF(2.7,-1.65)
+            - F(0.775,-2.375)(1.975,-2.375)B(0.775,-2.375)
+            - (4.95,-0.7)VB(2.7,-0.7)
+            - F(4.95,1.06)(4.95,-0.7)
+            - F(4.529,1.485)(4.95,1.06)
+            - F(3.481,1.485)(4.529,1.485)
+            - F(2.7,0.7)(3.481,1.485)
+            - (-4.95,-0.7)VF(-2.7,-0.7)
+            - B(-4.95,1.06)(-4.95,-0.7)
+            - B(-4.529,1.485)(-4.95,1.06)
+            - B(-3.481,1.485)(-4.529,1.485)
+            - B(-2.7,0.7)(-3.481,1.485)
+        placement: { at: [ 0, 5, 0 ], rotate: 0 }
+      led_caps:
+        what: bhkfp/cap_0603
+        params: { reversible: true, include_traces_vias: false, to: VCC, from: GND, side: B }
+        placement: { at: [ 0, 7.375, 0 ], rotate: 0 }
+  controller:
+    revision: bhk-planar-v1
+    envelopes:
+      pcb: { size: [ 18, 33 ] }
+      body: { size: [ 18, 33 ] }
+  display:
+    revision: nice-view-published-2026-09-09
+    envelopes:
+      pcb: { size: [ 14, 36 ] }
+      body: { size: [ 14, 36 ], height: [ 0, display_body_height ] }
+  scrollwheel:
+    revision: bhk-planar-v1
+    envelopes:
+      pcb: { size: [ 18, 20 ] }
+  key_rotated:
+    revision: bhk-layout-v1
+    envelopes:
+      pcb: { size: [ 18, 18 ] }
+      plate: { size: [ 14, 14 ] }
+      body: { size: [ 14, 14 ], height: [ 0, 11.6 ] }
+      keycap: { size: [ 18, 18 ] }
+    footprints:
+      switches:
+        what: ceoloide/switch_mx
+        params:
+          from: "{{column_net}}"
+          to: "{{column_net}}_{{row_net}}"
+          hotswap: true
+          reversible: true
+          include_traces_vias: false
+          hotswap_pads_same_side: true
+          include_plated_holes: true
+          include_stabilizer_nets: true
+          include_centerhole_net: true
+          RIGHTSTAB: "{{column_net}}"
+          LEFTSTAB: "{{colrow}}"
+        placement: { at: [ 0, 0, 0 ], rotate: 180 }
+      routes_switches:
+        what: ceoloide/utility_router
+        params:
+          locked: false
+          routes: [ "B(5.842,-5.08)(5.842,-0.762)(5.08,-0)", "F(-6.371,-1.291)(-5.08,0)(-6.371,-1.291)(-6.371,-4.551)(-6.371,-1.291)", "B(-5.08,0)(-6.076,0)(-7.085,-1.009)(-7.085,-2.54)(-7.085,-1.009)(-6.076,0)(-5.08,0)" ]
+        placement: { at: [ 0, 0, 0 ], rotate: 180 }
+      diodes:
+        what: ceoloide/diode_tht_sod123
+        params: { from: "{{column_net}}_{{row_net}}", to: "{{row_net}}", reversible: true, include_traces_vias: false }
+        placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+      routes_diodes:
+        what: ceoloide/utility_router
+        params:
+          locked: false
+          routes: [ "(-1.65,-1.143)VF(-1.65,0)B(-1.65,-1.143)", "F(1.65,-0)(1.65,-1.728)(1.22,-2.158)(1.749,-1.629)(5.009,-1.629)(6.3,-2.92)B(6.3,-1.924)(5.291,-0.915)(3.76,-0.915)(2.718,0.127)(1.777,0.127)(1.65,-0)" ]
+        placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+      leds_rotated:
+        what: ceoloide/led_sk6812mini-e
+        params: { reversible: true, P1: VCC, P2: "{{led_next}}", P3: GND, P4: "{{led_prev}}", side: B, include_traces_vias: false }
+        placement: { at: [ 0, 5, 0 ], rotate: 180 }
+      routes_leds_rotated:
+        what: ceoloide/utility_router
+        params:
+          locked: false
+          routes:
+            - F(-0,-5)(-1.143,-5)(-1.397,-4.746)(-2.286,-4.746)(-5.551,-1.481)(-5.551,-0.10353)(-4.74747,0.7)(-4.06,0.7)V
+            - B(-4.1148,0.6452)(-4.1148,0.0148)(-3.4,-0.7)(-2.7,-0.7)
+            - B(-4.06,0.7)(-4.1148,0.6452)
+            - F(-4.06,0.7)(-2.7,0.7)(-2.7,1.65)(-1.975,2.375)V(-0.775,2.375)F(-1.975,2.375)
+            - (-4.572,-0.7)VF(-2.7,-0.7)
+            - B(-4.572,-0.7)(-4.686,-0.586)(-4.686,0.982)(-4.2672,1.4008)(-3.4008,1.4008)(-2.7,0.7)
+            - F(3.4,-0.7)(4.06,-0.10592)(4.06,0.7)V(2.7,0.7)(2.7,1.65)(1.975,2.375)V(0.775,2.375)B(1.975,2.375)
+            - F(2.7,-0.7)(3.4,-0.7)
+            - F(2.7,0.7)(3.481,1.485)(4.529,1.485)(4.95,1.06)(4.95,-0.7)V(2.7,-0.7)
+        placement: { at: [ 0, 5, 0 ], rotate: 180 }
+      led_caps_rotated:
+        what: bhkfp/cap_0603
+        params: { reversible: true, include_traces_vias: false, to: VCC, from: GND, side: B }
+        placement: { at: [ 0, 7.375, 0 ], rotate: 180 }
+      routes_switch_col:
+        what: ceoloide/utility_router
+        params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+        placement: { at: [ 0, 0, 0 ], rotate: 180 }
+  power_switch:
+    # PCB support from footprint pads/bosses; body height remains unknown.
+    revision: bhk-pad-support-v1
+    envelopes:
+      pcb: { size: [ 5, 8.5 ], at: [ -0.5, 0, 0 ] }
+  reset_button:
+    # PCB support from footprint pads/bosses; body height remains unknown.
+    revision: bhk-pad-support-v1
+    envelopes:
+      pcb: { size: [ 7, 4 ], at: [ 0, 0, 0 ] }
+layout:
+  clusters:
+    matrix:
+      arrangement: { type: free }
+      layer: electronics
+    thumbfan:
+      arrangement: { type: free }
+      layer: electronics
+    electronics:
+      arrangement: { type: free }
+      layer: electronics
+  layers:
+    electronics: { surface: pcb.bhk_pcb.top }
+    display_support:
+      surface: pcb.bhk_pcb.top
+      placement: { at: [ 0, 0, display_socket_height ] }
+    floor: { surface: case.bhk.floor, assembly: bhk }
+  objects:
+    matrix_c1_r4:
+      kind: key
+      placement: { at: [ 150, -131, 0 ] }
+      part: key
+      cluster: matrix
+      envelopes:
+        pcb: { size: [ 23.75, 18 ] }
+        keycap: { size: [ 22.5, 18 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c1_r4, column_net: c1, row_net: r4, led_prev: LED_20, led_next: LED_21 }
+      footprints: { switches: S1, routes_switches: _1, diodes: D1, routes_diodes: _34, leds: LED1, routes_leds: _70, led_caps: C1 }
+    matrix_c1_r3:
+      kind: key
+      placement: { at: [ 150, -112, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      envelopes:
+        pcb: { size: [ 23.75, 18 ] }
+        keycap: { size: [ 22.5, 18 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c1_r3, column_net: c1, row_net: r3, led_prev: LED_19, led_next: LED_20 }
+      footprints: { switches: S2, routes_switches: _2, diodes: D2, routes_diodes: _35, leds_rotated: LED16, routes_leds_rotated: _85, led_caps_rotated: C16, routes_switch_col: _103 }
+    matrix_c1_r2:
+      kind: key
+      placement: { at: [ 150, -93, 0 ] }
+      part: key
+      cluster: matrix
+      envelopes:
+        pcb: { size: [ 23.75, 18 ] }
+        keycap: { size: [ 22.5, 18 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c1_r2, column_net: c1, row_net: r2, led_prev: LED_7, led_next: LED_8 }
+      footprints:
+        switches: S3
+        routes_switches: _3
+        diodes:
+          reference: D3
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _36
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED2
+        routes_leds: _71
+        led_caps: C2
+        routes_switch_col:
+          reference: _104
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c1_r1:
+      kind: key
+      placement: { at: [ 150, -74, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      envelopes:
+        pcb: { size: [ 23.75, 18 ] }
+        keycap: { size: [ 22.5, 18 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c1_r1, column_net: c1, row_net: r1, led_prev: LED_6, led_next: LED_7 }
+      footprints: { switches: S4, routes_switches: _4, diodes: D4, routes_diodes: _37, leds_rotated: LED17, routes_leds_rotated: _86, led_caps_rotated: C17, routes_switch_col: _105 }
+    matrix_c2_r4:
+      kind: key
+      placement: { at: [ 171.375, -131, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c2_r4, column_net: c2, row_net: r4, led_prev: LED_21, led_next: LED_22 }
+      footprints: { switches: S5, routes_switches: _5, diodes: D5, routes_diodes: _38, leds: LED3, routes_leds: _72, led_caps: C3 }
+    matrix_c2_r3:
+      kind: key
+      placement: { at: [ 171.375, -112, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c2_r3, column_net: c2, row_net: r3, led_prev: LED_18, led_next: LED_19 }
+      footprints: { switches: S6, routes_switches: _6, diodes: D6, routes_diodes: _39, leds_rotated: LED18, routes_leds_rotated: _87, led_caps_rotated: C18, routes_switch_col: _106 }
+    matrix_c2_r2:
+      kind: key
+      placement: { at: [ 171.375, -93, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c2_r2, column_net: c2, row_net: r2, led_prev: LED_8, led_next: LED_9 }
+      footprints:
+        switches: S7
+        routes_switches: _7
+        diodes:
+          reference: D7
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _40
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED4
+        routes_leds: _73
+        led_caps: C4
+        routes_switch_col:
+          reference: _107
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c2_r1:
+      kind: key
+      placement: { at: [ 171.375, -74, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c2_r1, column_net: c2, row_net: r1, led_prev: LED_5, led_next: LED_6 }
+      footprints: { switches: S8, routes_switches: _8, diodes: D8, routes_diodes: _41, leds_rotated: LED19, routes_leds_rotated: _88, led_caps_rotated: C19, routes_switch_col: _108 }
+    matrix_c3_r5:
+      kind: key
+      placement: { at: [ 190.375, -145.25, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c3_r5, column_net: c3, row_net: r5, led_prev: LED_32, led_next: LED_END }
+      footprints:
+        switches: S9
+        routes_switches: _9
+        diodes:
+          reference: D9
+          placement: { at: [ 8, -6.300000000000011, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _42
+          placement: { at: [ 8, -6.300000000000011, 0 ], rotate: 90 }
+        leds_rotated: LED20
+        routes_leds_rotated: _89
+        led_caps_rotated: C20
+    matrix_c3_r4:
+      kind: key
+      placement: { at: [ 190.375, -126.25, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c3_r4, column_net: c3, row_net: r4, led_prev: LED_22, led_next: LED_23 }
+      footprints:
+        switches: S10
+        routes_switches: _10
+        diodes: D10
+        routes_diodes: _43
+        leds: LED5
+        routes_leds: _74
+        led_caps: C5
+        routes_switch_col:
+          reference: _109
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c3_r3:
+      kind: key
+      placement: { at: [ 190.375, -107.25, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c3_r3, column_net: c3, row_net: r3, led_prev: LED_17, led_next: LED_18 }
+      footprints: { switches: S11, routes_switches: _11, diodes: D11, routes_diodes: _44, leds_rotated: LED21, routes_leds_rotated: _90, led_caps_rotated: C21, routes_switch_col: _110 }
+    matrix_c3_r2:
+      kind: key
+      placement: { at: [ 190.375, -88.25, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c3_r2, column_net: c3, row_net: r2, led_prev: LED_9, led_next: LED_10 }
+      footprints:
+        switches: S12
+        routes_switches: _12
+        diodes:
+          reference: D12
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _45
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED6
+        routes_leds: _75
+        led_caps: C6
+        routes_switch_col:
+          reference: _111
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c3_r1:
+      kind: key
+      placement: { at: [ 190.375, -69.25, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c3_r1, column_net: c3, row_net: r1, led_prev: LED_4, led_next: LED_5 }
+      footprints: { switches: S13, routes_switches: _13, diodes: D13, routes_diodes: _46, leds_rotated: LED22, routes_leds_rotated: _91, led_caps_rotated: C22, routes_switch_col: _112 }
+    matrix_c4_r5:
+      kind: key
+      placement: { at: [ 209.375, -142.875, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c4_r5, column_net: c4, row_net: r5, led_prev: LED_31, led_next: LED_32 }
+      footprints:
+        switches: S14
+        routes_switches: _14
+        diodes:
+          reference: D14
+          placement: { at: [ 8, -6.300000000000011, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _47
+          placement: { at: [ 8, -6.300000000000011, 0 ], rotate: 90 }
+        leds_rotated: LED23
+        routes_leds_rotated: _92
+        led_caps_rotated: C23
+    matrix_c4_r4:
+      kind: key
+      placement: { at: [ 209.375, -123.875, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c4_r4, column_net: c4, row_net: r4, led_prev: LED_23, led_next: LED_24 }
+      footprints:
+        switches: S15
+        routes_switches: _15
+        diodes: D15
+        routes_diodes: _48
+        leds: LED7
+        routes_leds: _76
+        led_caps: C7
+        routes_switch_col:
+          reference: _113
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c4_r3:
+      kind: key
+      placement: { at: [ 209.375, -104.875, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c4_r3, column_net: c4, row_net: r3, led_prev: LED_16, led_next: LED_17 }
+      footprints: { switches: S16, routes_switches: _16, diodes: D16, routes_diodes: _49, leds_rotated: LED24, routes_leds_rotated: _93, led_caps_rotated: C24, routes_switch_col: _114 }
+    matrix_c4_r2:
+      kind: key
+      placement: { at: [ 209.375, -85.875, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c4_r2, column_net: c4, row_net: r2, led_prev: LED_10, led_next: LED_11 }
+      footprints:
+        switches: S17
+        routes_switches: _17
+        diodes:
+          reference: D17
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _50
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED8
+        routes_leds: _77
+        led_caps: C8
+        routes_switch_col:
+          reference: _115
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c4_r1:
+      kind: key
+      placement: { at: [ 209.375, -66.875, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c4_r1, column_net: c4, row_net: r1, led_prev: LED_3, led_next: LED_4 }
+      footprints: { switches: S18, routes_switches: _18, diodes: D18, routes_diodes: _51, leds_rotated: LED25, routes_leds_rotated: _94, led_caps_rotated: C25, routes_switch_col: _116 }
+    matrix_c5_r4:
+      kind: key
+      placement: { at: [ 228.375, -126.25, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c5_r4, column_net: c5, row_net: r4, led_prev: LED_24, led_next: LED_25 }
+      footprints: { switches: S19, routes_switches: _19, diodes: D19, routes_diodes: _52, leds: LED9, routes_leds: _78, led_caps: C9 }
+    matrix_c5_r3:
+      kind: key
+      placement: { at: [ 228.375, -107.25, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c5_r3, column_net: c5, row_net: r3, led_prev: LED_15, led_next: LED_16 }
+      footprints: { switches: S20, routes_switches: _20, diodes: D20, routes_diodes: _53, leds_rotated: LED26, routes_leds_rotated: _95, led_caps_rotated: C26, routes_switch_col: _117 }
+    matrix_c5_r2:
+      kind: key
+      placement: { at: [ 228.375, -88.25, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c5_r2, column_net: c5, row_net: r2, led_prev: LED_11, led_next: LED_12 }
+      footprints:
+        switches: S21
+        routes_switches: _21
+        diodes:
+          reference: D21
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _54
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED10
+        routes_leds: _79
+        led_caps: C10
+        routes_switch_col:
+          reference: _118
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c5_r1:
+      kind: key
+      placement: { at: [ 228.375, -69.25, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c5_r1, column_net: c5, row_net: r1, led_prev: LED_2, led_next: LED_3 }
+      footprints: { switches: S22, routes_switches: _22, diodes: D22, routes_diodes: _55, leds_rotated: LED27, routes_leds_rotated: _96, led_caps_rotated: C27, routes_switch_col: _119 }
+    matrix_c6_r4:
+      kind: key
+      placement: { at: [ 247.375, -131, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c6_r4, column_net: c6, row_net: r4, led_prev: LED_25, led_next: LED_26 }
+      footprints: { switches: S23, routes_switches: _23, diodes: D23, routes_diodes: _56, leds: LED11, routes_leds: _80, led_caps: C11 }
+    matrix_c6_r3:
+      kind: key
+      placement: { at: [ 247.375, -112, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c6_r3, column_net: c6, row_net: r3, led_prev: LED_14, led_next: LED_15 }
+      footprints: { switches: S24, routes_switches: _24, diodes: D24, routes_diodes: _57, leds_rotated: LED28, routes_leds_rotated: _97, led_caps_rotated: C28, routes_switch_col: _120 }
+    matrix_c6_r2:
+      kind: key
+      placement: { at: [ 247.375, -93, 0 ] }
+      part: key
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c6_r2, column_net: c6, row_net: r2, led_prev: LED_12, led_next: LED_13 }
+      footprints:
+        switches: S25
+        routes_switches: _25
+        diodes:
+          reference: D25
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _58
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED12
+        routes_leds: _81
+        led_caps: C12
+        routes_switch_col:
+          reference: _121
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    matrix_c6_r1:
+      kind: key
+      placement: { at: [ 247.375, -74, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c6_r1, column_net: c6, row_net: r1, led_prev: LED_1, led_next: LED_2 }
+      footprints: { switches: S26, routes_switches: _26, diodes: D26, routes_diodes: _59, leds_rotated: LED29, routes_leds_rotated: _98, led_caps_rotated: C29, routes_switch_col: _122 }
+    matrix_c7_r2:
+      kind: key
+      placement: { at: [ 266.375, -107.25, 0 ] }
+      part: key
+      cluster: matrix
+      envelopes:
+        pcb: { size: [ 18, 27 ] }
+        keycap: { size: [ 18, 27 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c7_r2, column_net: c7, row_net: r2, led_prev: LED_13, led_next: LED_14 }
+      footprints:
+        switches: S27
+        routes_switches: _27
+        diodes:
+          reference: D27
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _60
+          placement: { at: [ 8, -6.299999999999997, 0 ], rotate: 90 }
+        leds: LED13
+        routes_leds: _82
+        led_caps: C13
+    matrix_c7_r1:
+      kind: key
+      placement: { at: [ 266.375, -83.5, 0 ] }
+      part: key_rotated
+      cluster: matrix
+      pcb: bhk_pcb
+      properties: { colrow: c7_r1, column_net: c7, row_net: r1, led_prev: DOUT, led_next: LED_1 }
+      footprints:
+        switches: S28
+        routes_switches: _28
+        diodes: D28
+        routes_diodes: _61
+        routes_on_off_switch:
+          reference: _68
+          what: ceoloide/utility_router
+          params:
+            locked: false
+            routes:
+              - B(-1.735,0.75)(-1.57926,0.59426)(-0.60209,0.59426)(-0.04329,0.03546)V(-0.82875,-0.75)(-1.735,-0.75)
+              - B(-0.62275,2.25)(-1.735,2.25)
+              - B(0.00751,2.88026)(-0.62275,2.25)
+              - (0.00751,3.64226)VB(0.00751,2.88026)F(0.00751,3.64226)
+              - F(0.00751,2.88026)(-0.62275,2.25)(-1.735,2.25)
+          placement: { at: [ 4.75, 17.575000000000003, 0 ], rotate: 90 }
+        routes_reset_switch:
+          reference: _69
+          what: ceoloide/utility_router
+          params:
+            locked: false
+            routes:
+              - F(-2.625,-0.85)(-2.117,-0.342)(-1.69,-0.342)(-1.1684,-0.8636)V(-0.6468,-0.342)(2.117,-0.342)(2.625,-0.85)
+              - F(-1.1684,-0.8636)(-0.6468,-0.342)(2.117,-0.342)(2.625,-0.85)
+              - F(-2.625,0.85)(-2.22756,0.45256)(0.30016,0.45256)(1.016,1.1684)V(1.73184,0.45256)(2.22756,0.45256)(2.625,0.85)
+              - F(1.016,1.1684)(1.73184,0.45256)(2.22756,0.45256)(2.625,0.85)
+          placement: { at: [ -7.600000000000023, 17.2727273, 0 ], rotate: 0 }
+        leds_rotated: LED30
+        routes_leds_rotated: _99
+        led_caps_rotated: C30
+        routes_switch_col: _123
+    thumbfan_c1_r2:
+      kind: key
+      placement: { at: [ 237.875, -150, 0 ], rotate: -15 }
+      part: key_rotated
+      cluster: thumbfan
+      envelopes:
+        pcb: { size: [ 23.75, 18 ] }
+        keycap: { size: [ 22.5, 18 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c1_r2, led_prev: LED_30, led_next: LED_31, column_net: c5, row_net: r5 }
+      footprints:
+        switches: S29
+        routes_switches: _29
+        diodes:
+          reference: D29
+          placement: { at: [ 7.999999983410568, -6.300000039187658, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _62
+          placement: { at: [ 7.999999983410568, -6.300000039187658, 0 ], rotate: 90 }
+        leds_rotated:
+          reference: LED31
+          placement: { at: [ -1.650464365177129e-8, 4.9999999630229865, 0 ], rotate: 180 }
+        routes_leds_rotated:
+          reference: _100
+          placement: { at: [ -1.650464365177129e-8, 4.9999999630229865, 0 ], rotate: 180 }
+        led_caps_rotated:
+          reference: C31
+          placement: { at: [ 3.287126881801328e-8, 7.375000041023686, 0 ], rotate: 180 }
+    thumbfan_c2_r2:
+      kind: key
+      placement: { at: [ 258.6687184, -160.4892219, 0 ], rotate: -30 }
+      part: key_rotated
+      cluster: thumbfan
+      pcb: bhk_pcb
+      properties: { colrow: c2_r2, led_prev: LED_29, led_next: LED_30, column_net: c7, row_net: r4 }
+      footprints:
+        switches: S30
+        routes_switches: _30
+        diodes:
+          reference: D30
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _63
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        leds_rotated:
+          reference: LED32
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 180 }
+        routes_leds_rotated:
+          reference: _101
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 180 }
+        led_caps_rotated:
+          reference: C32
+          placement: { at: [ -2.3544878491321697e-8, 7.375000040780928, 0 ], rotate: 180 }
+    thumbfan_c2_r1:
+      kind: key
+      placement: { at: [ 270.5437184, -139.92111849999998, 0 ], rotate: -30 }
+      part: key
+      cluster: thumbfan
+      envelopes:
+        pcb: { size: [ 18, 27 ] }
+        keycap: { size: [ 18, 27 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c2_r1, led_prev: LED_26, led_next: LED_27, column_net: c6, row_net: r5 }
+      footprints:
+        switches: S31
+        routes_switches: _31
+        diodes:
+          reference: D31
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _64
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        leds:
+          reference: LED14
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 0 }
+        routes_leds:
+          reference: _83
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 0 }
+        led_caps:
+          reference: C14
+          placement: { at: [ -2.3544878491321697e-8, 7.375000040780928, 0 ], rotate: 0 }
+        routes_switch_col:
+          reference: _124
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    thumbfan_c3_r2:
+      kind: key
+      placement: { at: [ 275.12320109999996, -169.9892219, 0 ], rotate: -30 }
+      part: key_rotated
+      cluster: thumbfan
+      pcb: bhk_pcb
+      properties: { colrow: c3_r2, led_prev: LED_28, led_next: LED_29, column_net: c8, row_net: r4 }
+      footprints:
+        switches: S32
+        routes_switches: _32
+        diodes:
+          reference: D32
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _65
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        leds_rotated:
+          reference: LED33
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 180 }
+        routes_leds_rotated:
+          reference: _102
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 180 }
+        led_caps_rotated:
+          reference: C33
+          placement: { at: [ -2.3544878491321697e-8, 7.375000040780928, 0 ], rotate: 180 }
+    thumbfan_c3_r1:
+      kind: key
+      placement: { at: [ 286.99820109999996, -149.42111849999998, 0 ], rotate: -30 }
+      part: key
+      cluster: thumbfan
+      envelopes:
+        pcb: { size: [ 18, 27 ] }
+        keycap: { size: [ 18, 27 ] }
+      pcb: bhk_pcb
+      properties: { colrow: c3_r1, led_prev: LED_27, led_next: LED_28, column_net: c8, row_net: r5 }
+      footprints:
+        switches: S33
+        routes_switches: _33
+        diodes:
+          reference: D33
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        routes_diodes:
+          reference: _66
+          placement: { at: [ 7.999999951859666, -6.2999999771695006, 0 ], rotate: 90 }
+        leds:
+          reference: LED15
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 0 }
+        routes_leds:
+          reference: _84
+          placement: { at: [ 9.46109501853698e-9, 4.999999983612904, 0 ], rotate: 0 }
+        led_caps:
+          reference: C15
+          placement: { at: [ -2.3544878491321697e-8, 7.375000040780928, 0 ], rotate: 0 }
+        routes_switch_col:
+          reference: _125
+          what: ceoloide/utility_router
+          params: { locked: false, routes: [ "F(5.08,-0)(6.18,-1.1)(6.18,-17.9)(5.08,-19)" ] }
+          placement: { at: [ 0, 0, 0 ], rotate: 180 }
+    mcu:
+      kind: component
+      placement: { at: [ 286.475, -81, 0 ] }
+      part: controller
+      cluster: electronics
+      pcb: bhk_pcb
+      properties: { colrow: default_default }
+      footprints:
+        mcu:
+          what: ceoloide/mcu_supermini_nrf52840
+          params:
+            reversible: true
+            reverse_mount: false
+            only_required_jumpers: false
+            use_rectangular_jumpers: true
+            P1: DOUT
+            P0: c7
+            P2: r1
+            P3: c2
+            P4: c3
+            P5: c4
+            P6: c5
+            P7: c6
+            P8: c8
+            P9: DA
+            P21: c6
+            P20: ""
+            P19: r1
+            P18: c6
+            P14: r2
+            P16: c5
+            P10: r3
+          reference: MCU1
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    display:
+      kind: component
+      placement: { at: [ 286.475, -84.5, 0 ] }
+      part: display
+      cluster: electronics
+      pcb: bhk_pcb
+      layer: display_support
+      properties: { colrow: default_default }
+      footprints:
+        display:
+          what: ceoloide/display_nice_view
+          params: { reversible: true, invert_jumpers_position: true, MOSI: DA, SCK: CL }
+          reference: DISP1
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    scrollwheel:
+      kind: component
+      placement: { at: [ 286.475, -117.75, 0 ] }
+      part: scrollwheel
+      cluster: electronics
+      pcb: bhk_pcb
+      properties: { colrow: default_default, column_net: c8, row_net: r3 }
+      footprints:
+        scrollwheel:
+          what: bhkfp/thqwgd001c
+          params: { reversible: true, P1: GND, P2: GND, P3: P20 }
+          reference: MOD1
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+        routes_scrollwheel:
+          what: ceoloide/utility_router
+          params:
+            locked: false
+            routes:
+              - B(-4.9,-2.4892)(-6.3122,-2.4892)V(-7.7892,-2.4892)(-7.8,-2.5)
+              - B(-4.9,0)(-6.3122,0)V(-7.8,0)
+              - B(-4.9508,2.4892)(-6.363,2.4892)V(-7.7892,2.4892)(-7.8,2.5)
+              - B(9.75,2.25)(6.6566,2.25)(6.6418,2.2352)V(3.2648,2.2352)(3.25,2.25)
+              - B(9.7633,-2.1844)(6.6699,-2.1844)(6.6551,-2.1992)V(3.2781,-2.1992)(3.2633,-2.1844)
+          reference: _67
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+        diode_scrollwheel:
+          what: ceoloide/diode_tht_sod123
+          params: { from: "{{column_net}}_{{row_net}}", to: "{{row_net}}", reversible: true, include_traces_vias: false }
+          reference: D34
+          placement: { at: [ 4, -6.299999999999997, 0 ], rotate: 90 }
+        battery_connector:
+          what: ceoloide/battery_connector_jst_ph_2
+          params: { reversible: true, side: B }
+          reference: JST1
+          placement: { at: [ -11.515151500000002, -6.3333332999999925, 0 ], rotate: -90 }
+    corne_screw_1:
+      kind: mount
+      placement: { at: [ 160.6875, -85.875, 0 ] }
+      pcb: bhk_pcb
+      layer: electronics
+      properties: { colrow: default_default }
+      footprints:
+        m2_screws:
+          what: ceoloide/mounting_hole_plated
+          params: &a1 { outline: 1.2, drill: 2.2 }
+          reference: H1
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    corne_screw_2:
+      kind: mount
+      placement: { at: [ 237.875, -83.5, 0 ] }
+      pcb: bhk_pcb
+      layer: electronics
+      properties: { colrow: default_default }
+      footprints:
+        m2_screws:
+          what: ceoloide/mounting_hole_plated
+          params: *a1
+          reference: H2
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    corne_screw_3:
+      kind: mount
+      placement: { at: [ 160.6875, -123.875, 0 ] }
+      pcb: bhk_pcb
+      layer: electronics
+      properties: { colrow: default_default }
+      footprints:
+        m2_screws:
+          what: ceoloide/mounting_hole_plated
+          params: *a1
+          reference: H3
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    corne_screw_4:
+      kind: mount
+      placement: { at: [ 237.875, -121.5, 0 ] }
+      pcb: bhk_pcb
+      layer: electronics
+      properties: { colrow: default_default }
+      footprints:
+        m2_screws:
+          what: ceoloide/mounting_hole_plated
+          params: *a1
+          reference: H4
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    corne_screw_5:
+      kind: mount
+      placement: { at: [ 271.64595975, -157.0119806, 0 ], rotate: -30 }
+      pcb: bhk_pcb
+      layer: electronics
+      properties: { colrow: default_default }
+      footprints:
+        m2_screws:
+          what: ceoloide/mounting_hole_plated
+          params: *a1
+          reference: H5
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    corne_screw_6:
+      kind: mount
+      placement: { at: [ 224.2449994, -141.7281369, 0 ], rotate: -7.5 }
+      pcb: bhk_pcb
+      layer: electronics
+      properties: { colrow: default_default }
+      footprints:
+        m2_screws:
+          what: ceoloide/mounting_hole_plated
+          params: *a1
+          reference: H6
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    gasket_mount_left:
+      kind: anchor
+      placement: { at: [ 136.125, -102.5, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_top_left:
+      kind: anchor
+      placement: { at: [ 160.6875, -62.5, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_top_centre:
+      kind: anchor
+      placement: { at: [ 209.375, -55.375, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_top_right:
+      kind: anchor
+      placement: { at: [ 247.375, -62.5, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_right:
+      kind: anchor
+      placement: { at: [ 297.475, -97.5, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_bottom_left:
+      kind: anchor
+      placement: { at: [ 160.6875, -161.5, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_bottom_centre:
+      kind: anchor
+      placement: { at: [ 209.375, -156.75, 0 ] }
+      properties: { colrow: default_default }
+    gasket_mount_thumbfan_bottom:
+      kind: anchor
+      placement: { at: [ 261.14595975, -175.198514, 0 ], rotate: -30 }
+      properties: { colrow: default_default }
+    gasket_mount_thumbfan_right:
+      kind: anchor
+      placement: { at: [ 291.0199932, -165.4551702, 0 ], rotate: -30 }
+      properties: { colrow: default_default }
+    board_zone_gnd:
+      kind: component
+      pcb: bhk_pcb
+      layer: electronics
+      placement: { at: [ 0, 0, 0 ] }
+      footprints:
+        zone_gnd:
+          what: ceoloide/utility_filled_zone
+          params: { locked: false }
+          reference: _126
+          placement: { at: [ 0, 0, 0 ], rotate: 0 }
+    power_switch:
+      kind: component
+      part: power_switch
+      cluster: electronics
+      pcb: bhk_pcb
+      placement: { ref: matrix_c7_r1, at: [ 4.75, 17.5, 0 ], rotate: 90 }
+      footprints:
+        switch:
+          reference: PWR1
+          what: ceoloide/power_switch_smd_side
+          params: { from: BAT_P, to: RAW, reversible: true }
+    reset_button:
+      kind: component
+      part: reset_button
+      cluster: electronics
+      pcb: bhk_pcb
+      placement: { ref: matrix_c7_r1, at: [ -7.600000000000023, 17.2727273, 0 ], rotate: 0 }
+      footprints:
+        switch:
+          reference: RST1
+          what: ceoloide/reset_switch_smd_side
+          params: { reversible: true, include_bosses: true }
+designs:
+  regions:
+    matrix:
+      select: { kind: key, cluster: matrix }
+      envelope: pcb
+      close: 2
+    thumbs:
+      select: { kind: key, cluster: thumbfan }
+      envelope: pcb
+      close: 2
+    electronics:
+      select: { kind: component, cluster: electronics, pcb: bhk_pcb }
+      envelope: pcb
+      wrap: box
+  boundaries:
+    board:
+      from: [ regions.matrix, regions.thumbs, regions.electronics ]
+      bridges:
+        top:
+          from: { feature: regions.matrix }
+          to: { feature: regions.electronics }
+          align: top
+          width: 20
+        bottom:
+          from: { feature: regions.matrix }
+          to: { feature: regions.thumbs }
+          align: bottom
+          width: 26
+        right:
+          from: { feature: regions.electronics }
+          to: { feature: regions.thumbs }
+          align: right
+          width: 20
+      clearance: 2
+      simplify: 8
+      corners: { fillet: 3 }
+      connected: single
+  profiles:
+    bhk: { from: boundaries.board }
+  assemblies:
+    bhk:
+      preset: enclosure
+      profile: profiles.bhk
+      board: { source: generated, name: bhk_pcb }
+      mounting: bottom
+      construction: cover
+      wall: 3
+      floor: 2
+      height: 24
+      plate: 1.5
+      plate_z: 13
+      pcb_z: 6
+      bezel: 10
+      fit: 0.5
+      ledge: { width: 2, thickness: 2 }
+pcbs:
+  bhk_pcb: { profile: profiles.bhk, thickness: 1.6 }
