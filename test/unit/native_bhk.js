@@ -26,12 +26,24 @@ const summarize = source => {
 
 describe('Native BHK acceptance', function() {
     this.timeout(120000)
-    it('preserves placement, footprints and pad nets while replacing the perimeter', async () => {
+    before(() => {
         for (const [name,source] of Object.entries(require('../fixtures/native-baseline/providers.json'))) {
             const module={exports:{}}
             vm.runInNewContext(source,{module,exports:module.exports,require:createRequire(path.resolve(__dirname,'../../src/footprints/virtual.js'))})
             engine.inject('footprint',name,module.exports)
         }
+    })
+    it('generates BHK CNC pockets without spurious radius blockers', async () => {
+        const input=yaml.parse(fs.readFileSync(path.resolve(__dirname,'../../docs/examples/native/bhk.yaml'),'utf8'))
+        input.designs.assemblies.bhk.manufacturing=Object.fromEntries(['bottom','top','plate'].map(part=>[part, {
+            process:'cnc', cutter:part==='plate'?1:3, reach:30, min_wall:part==='plate'?0.8:2,
+            setups:['top','bottom','left','right'], drill:2.5
+        }]))
+        const result=await engine.process(input)
+        assert.deepEqual(result.designs.assemblies.bhk.manufacturing.filter(issue=>issue.severity==='error'),[])
+        for (const part of ['bottom','top','plate']) { assert.ok(result.solids[`bhk_${part}`].volume>0) }
+    })
+    it('preserves placement, footprints and pad nets while replacing the perimeter', async () => {
         const source=fs.readFileSync(path.resolve(__dirname,'../../docs/examples/native/bhk.yaml'),'utf8')
         const input=yaml.parse(source)
         const result=await engine.process(source,{analysis:true,debug:true})

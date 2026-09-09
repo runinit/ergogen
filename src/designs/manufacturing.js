@@ -1,3 +1,5 @@
+const {TOLERANCE} = require('./geometry')
+
 // Findings describe declared process limits, not CAM or physical certification.
 exports.check = (part, spec, geometry) => {
     const findings = []
@@ -21,7 +23,14 @@ exports.check = (part, spec, geometry) => {
         }
         if (depth > spec.reach) { issue('reach', 'Pocket depth exceeds declared cutter reach.') }
         if (spec.cutter > width) { issue('access', 'Cutter cannot enter the available pocket.') }
-        if (fillet < spec.cutter / 2) { issue('radius', 'The generated pocket has corners smaller than the cutter radius. Add corner relief or choose another process.') }
+        for (const pocket of geometry.pockets || [{radius: fillet}]) {
+            if (pocket.failure) {
+                findings.push({feature: `${part}.${pocket.id}`, code: 'tool-clearance', message: pocket.failure, severity: 'error'})
+            } else if (pocket.radius < spec.cutter / 2 - TOLERANCE) {
+                findings.push({feature: pocket.id ? `${part}.${pocket.id}` : part, code: 'radius', severity: 'error',
+                    message: 'This pocket still cannot fit the cutter after automatic relief. Choose a smaller cutter or revise the pocket.'})
+            }
+        }
         if (!spec.setups.includes('top')) { issue('setup', 'An interior-face machining setup is required.') }
         if (holes.some(hole => hole.diameter < spec.cutter && !spec.drill)) {
             issue('drill', 'Small holes require a declared drill diameter.', 'warning')

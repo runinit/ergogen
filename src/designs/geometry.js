@@ -127,7 +127,8 @@ const contains = (outer, inner) => {
     if (JSON.stringify(outer) === JSON.stringify(inner) || empty(inner)) { return true }
     if (empty(outer)) { return false }
     const outerPaths = paths(outer), innerPaths = paths(inner)
-    const boundary = (point, segments) => segments.some(segment => m.measure.isPointOnPath(point, segment, TOLERANCE))
+    const boundary = (point, segments) => segments.some(segment => m.measure.isPointOnPath(point, segment, TOLERANCE) ||
+        (m.point.fromPathEnds(segment) || []).some(end => m.measure.pointDistance(point, end) < TOLERANCE))
     const inside = (point, model) => m.measure.isPointInsideModel(point, model, {farPoint: u.farPoint})
     // Split analytically before classifying segments, including enclosed cutouts.
     const splitInner = paths(m.model.breakPathsAtIntersections(clone(inner), outer))

@@ -57,6 +57,31 @@ describe('Solid enclosures', function() {
         const result = await engine.process(input)
         assert.deepEqual(result.designs.assemblies.case.manufacturing.filter(issue => issue.severity === 'error'), [])
     })
+    it('automatically relieves CNC shells and switch pockets while preserving FDM', async () => {
+        const input = fixture()
+        const original = await engine.process(input)
+        input.designs.assemblies.case.manufacturing = Object.fromEntries(['bottom', 'top', 'plate'].map(part => [part, {
+            process: 'cnc', cutter: 3, reach: 30, min_wall: 1, setups: ['top', 'bottom']
+        }]))
+        const result = await engine.process(input)
+        assert.deepEqual(result.designs.assemblies.case.manufacturing.filter(issue => issue.code === 'radius'), [])
+        for (const part of ['bottom', 'top', 'plate']) {
+            assert.ok(result.solids[`case_${part}`].volume < original.solids[`case_${part}`].volume, part)
+        }
+        input.designs.assemblies.case.manufacturing.top = {process: 'fdm'}
+        const mixed = await engine.process(input)
+        assert.ok(Math.abs(mixed.solids.case_top.volume - original.solids.case_top.volume) < 0.001)
+    })
+    it('blocks relief that would thin the web between switch openings', async () => {
+        const input = fixture()
+        input.points = {zones: {keys: {columns: {left: {}, right: {key: {spread: 15}}}}}}
+        input.designs.assemblies.case.manufacturing = {plate: {process:'cnc', cutter:3, reach:10, min_wall:0.5, setups:['top']}}
+        const result = await engine.process(input)
+        const findings = result.designs.assemblies.case.manufacturing
+        const issue = findings.find(issue => issue.code === 'tool-clearance' && /web/.test(issue.message))
+        assert.ok(issue)
+        assert.equal(issue.repairs[0].path, 'designs.assemblies.case.manufacturing.plate')
+    })
     it('rejects gasket tabs that fill switch cutouts', async () => {
         const input = fixture('gasket')
         input.designs.regions.switch.size = [56, 14]
@@ -89,6 +114,16 @@ describe('Solid enclosures', function() {
         spec.manufacturing = {bottom: {process: 'cnc', cutter: 3, reach: 30, min_wall: 2, setups: ['top', 'bottom']}}
         const result = await engine.process(input)
         assert.ok(!result.designs.assemblies.case.manufacturing.some(issue => issue.feature.endsWith('.bottom') && issue.code === 'radius'))
+    })
+    it('adapts gasket pockets without a manually configured internal radius', async () => {
+        const input = fixture('gasket'), spec = input.designs.assemblies.case
+        spec.bezel = 8
+        spec.manufacturing = Object.fromEntries(['bottom', 'top', 'plate'].map(part => [part, {
+            process: 'cnc', cutter: 3, reach: 30, min_wall: 1, setups: ['top', 'bottom']
+        }]))
+        const result = await engine.process(input)
+        assert.deepEqual(result.designs.assemblies.case.manufacturing.filter(issue => issue.severity === 'error'), [])
+        assert.ok(result.designs.assemblies.case.machining.some(pocket => pocket.id === 'gaskets.left' && pocket.adjusted))
     })
     it('reports machining limits without claiming unconfigured features passed', async () => {
         const input = fixture()

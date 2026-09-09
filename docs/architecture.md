@@ -332,3 +332,26 @@ canvas; touch and drag dismiss contextual hints.
 The native BHK example omits the former gasket anchors and six Corne screw holes.
 Native enclosure contacts and case-closing hardware replace those layout helpers.
 Electrical component placements and wiring remain unchanged.
+
+## CNC pocket preparation
+
+Manufacturing settings participate in geometry generation. `enclosures.js`
+registers each pocket's part, source feature and depth interval. `tooling.js`
+adds local cutter-sized relief without shrinking a required opening;
+`pocket-plan.js` validates the proposed removal before the solid compiler applies
+it. FDM parts keep their nominal profiles even in mixed-process assemblies.
+
+The registry covers cavities below the roof, cover openings, plate cutouts,
+gasket pockets, ledges, plate clearance, registration recesses and hardware
+pockets. The compiler cuts only the additional removal, preserving existing
+posts and shelves. It publishes the relieved plate profile and reports measured
+pocket radii from the same prepared geometry. Signed line/arc area determines
+winding, including relief arcs larger than a semicircle. Endpoint comparisons
+and tangent checks use the geometry export tolerance.
+
+Relief cannot breach the declared minimum wall, thin neighboring plate webs or
+cut a mounting post. Rejected relief leaves the nominal pocket and reports a
+feature-specific blocker. Circular bores retain their specified fit. Side
+access, reach, drilling and setup checks remain separate; this is not CAM or
+physical-fit certification. Source outlines and electrical placements are not
+rewritten by manufacturing preparation.
