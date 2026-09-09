@@ -104,3 +104,16 @@ it('limits tray supports to the requested count of existing PCB holes', async ()
     assert.equal(result.designs.analysis.case.suggestions.filter(s=>s.definition.role==='pcb').length,1)
     assert.equal(result.designs.boards.case.holes.length,2)
 })
+
+describe('Gasket support spans', () => {
+    it('keeps flat contacts clear of short steps and curved corners', () => {
+        const m = require('makerjs')
+        const suggest = require('../../src/designs/mounts').suggest
+        const base = {paths: {step:new m.paths.Line([0,0],[12,0]), arc:new m.paths.Arc([0,20],20,0,90)}}
+        const candidates = suggest({profile:'board',suggest:{gaskets:{spacing:40,size:[10,6]}}}, {
+            base, exterior:new m.models.Rectangle(100,100), units:{}, name:'case', mounts:{}, exclusions:[],components:[],gasketModels:[],height:24,
+            shape: def => m.model.moveRelative(new m.models.Rectangle(10,6),def.anchor.shift)
+        })
+        assert.deepEqual(candidates, [], 'Short steps and arcs are not flat support spans')
+    })
+})

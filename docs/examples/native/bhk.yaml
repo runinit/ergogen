@@ -33,14 +33,7 @@ units:
   display_y: 36
   display_body_height: 2.9
   display_socket_height: 7
-  screw_radius: 1.1
-  spacer_radius: 2.05
   fillet_radius: 1
-  gasket_width: 4
-  gasket_length_lg: 55
-  gasket_length_md: 40
-  gasket_length_sm: 25
-  gasket_length_1kx: 10
 parts:
   key:
     revision: bhk-layout-v1
@@ -868,114 +861,6 @@ layout:
           params: { reversible: true, side: B }
           reference: JST1
           placement: { at: [ -11.515151500000002, -6.3333332999999925, 0 ], rotate: -90 }
-    corne_screw_1:
-      kind: mount
-      placement: { at: [ 160.6875, -85.875, 0 ] }
-      pcb: bhk_pcb
-      layer: electronics
-      properties: { colrow: default_default }
-      footprints:
-        m2_screws:
-          what: ceoloide/mounting_hole_plated
-          params: &a1 { outline: 1.2, drill: 2.2 }
-          reference: H1
-          placement: { at: [ 0, 0, 0 ], rotate: 0 }
-    corne_screw_2:
-      kind: mount
-      placement: { at: [ 237.875, -83.5, 0 ] }
-      pcb: bhk_pcb
-      layer: electronics
-      properties: { colrow: default_default }
-      footprints:
-        m2_screws:
-          what: ceoloide/mounting_hole_plated
-          params: *a1
-          reference: H2
-          placement: { at: [ 0, 0, 0 ], rotate: 0 }
-    corne_screw_3:
-      kind: mount
-      placement: { at: [ 160.6875, -123.875, 0 ] }
-      pcb: bhk_pcb
-      layer: electronics
-      properties: { colrow: default_default }
-      footprints:
-        m2_screws:
-          what: ceoloide/mounting_hole_plated
-          params: *a1
-          reference: H3
-          placement: { at: [ 0, 0, 0 ], rotate: 0 }
-    corne_screw_4:
-      kind: mount
-      placement: { at: [ 237.875, -121.5, 0 ] }
-      pcb: bhk_pcb
-      layer: electronics
-      properties: { colrow: default_default }
-      footprints:
-        m2_screws:
-          what: ceoloide/mounting_hole_plated
-          params: *a1
-          reference: H4
-          placement: { at: [ 0, 0, 0 ], rotate: 0 }
-    corne_screw_5:
-      kind: mount
-      placement: { at: [ 271.64595975, -157.0119806, 0 ], rotate: -30 }
-      pcb: bhk_pcb
-      layer: electronics
-      properties: { colrow: default_default }
-      footprints:
-        m2_screws:
-          what: ceoloide/mounting_hole_plated
-          params: *a1
-          reference: H5
-          placement: { at: [ 0, 0, 0 ], rotate: 0 }
-    corne_screw_6:
-      kind: mount
-      placement: { at: [ 224.2449994, -141.7281369, 0 ], rotate: -7.5 }
-      pcb: bhk_pcb
-      layer: electronics
-      properties: { colrow: default_default }
-      footprints:
-        m2_screws:
-          what: ceoloide/mounting_hole_plated
-          params: *a1
-          reference: H6
-          placement: { at: [ 0, 0, 0 ], rotate: 0 }
-    gasket_mount_left:
-      kind: anchor
-      placement: { at: [ 136.125, -102.5, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_top_left:
-      kind: anchor
-      placement: { at: [ 160.6875, -62.5, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_top_centre:
-      kind: anchor
-      placement: { at: [ 209.375, -55.375, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_top_right:
-      kind: anchor
-      placement: { at: [ 247.375, -62.5, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_right:
-      kind: anchor
-      placement: { at: [ 297.475, -97.5, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_bottom_left:
-      kind: anchor
-      placement: { at: [ 160.6875, -161.5, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_bottom_centre:
-      kind: anchor
-      placement: { at: [ 209.375, -156.75, 0 ] }
-      properties: { colrow: default_default }
-    gasket_mount_thumbfan_bottom:
-      kind: anchor
-      placement: { at: [ 261.14595975, -175.198514, 0 ], rotate: -30 }
-      properties: { colrow: default_default }
-    gasket_mount_thumbfan_right:
-      kind: anchor
-      placement: { at: [ 291.0199932, -165.4551702, 0 ], rotate: -30 }
-      properties: { colrow: default_default }
     board_zone_gnd:
       kind: component
       pcb: bhk_pcb

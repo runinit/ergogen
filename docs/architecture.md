@@ -317,3 +317,18 @@ archival; `native_cli.js` verifies the current command-line contract.
 The GUI pins a content-addressed engine tarball under `vendor/`. Rebuild and repin
 it after engine changes, then regenerate the browser bundle and previews. Do not
 validate a newer source checkout against an older installed package.
+
+## Mounting interaction
+
+Selecting gasket mounting removes rigid ledges and plate/PCB posts in one draft
+transaction; case-closing screws remain. Automatic flat contacts use straight
+spans with corner clearance. In-plane body contours preserve their rotation for
+clearance checks; tilted bodies retain conservative bounds. Manual contacts
+remain pinned during redistribution.
+The 2D editor separates geometry coordinates from pan/zoom and preserves the
+initial grab offset through pointer release. Selection controls sit below the
+canvas; touch and drag dismiss contextual hints.
+
+The native BHK example omits the former gasket anchors and six Corne screw holes.
+Native enclosure contacts and case-closing hardware replace those layout helpers.
+Electrical component placements and wiring remain unchanged.

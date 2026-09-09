@@ -37,12 +37,16 @@ describe('Native BHK acceptance', function() {
         const result=await engine.process(source,{analysis:true,debug:true})
         const original=require('../fixtures/native-baseline/bhk-points.json')
         for (const [id,point] of Object.entries(original)) {
+            if (/^(corne_screw_|gasket_mount_)/.test(id)) {
+                assert.equal(result.points[id],undefined,id)
+                continue
+            }
             assert.equal(round(result.points[id].x),round(point.x),id)
             assert.equal(round(result.points[id].y),round(point.y),id)
             assert.equal(round(result.points[id].r),round(point.r),id)
         }
         const before=fs.readFileSync(path.resolve(__dirname,'../fixtures/native-baseline/bhk.kicad_pcb'),'utf8')
-        assert.deepEqual(summarize(result.pcbs.bhk_pcb),summarize(before))
+        assert.deepEqual(summarize(result.pcbs.bhk_pcb),summarize(before).filter(item=>!/^H[1-6]$/.test(item.reference)))
         assert.equal(Object.values(result.layout.objects).filter(item=>item.kind==='key').length,33)
         assert.equal(result.designs.features['profiles.bhk'].contours,1)
         assert.ok(result.layout.findings.some(item=>item.code==='component-height'))
@@ -101,6 +105,6 @@ describe('Native BHK acceptance', function() {
         assert.equal(geometry.chains(exported.model).length,1)
         assert.equal(geometry.chains(exported.model)[0].contains?.length || 0,0)
         assert.ok(exported.pads.every(pad=>!pad.approximate && geometry.contains(exported.model,pad.model)))
-        assert.deepEqual(summarize(chamfer.pcbs.bhk_pcb),summarize(before))
+        assert.deepEqual(summarize(chamfer.pcbs.bhk_pcb),summarize(before).filter(item=>!/^H[1-6]$/.test(item.reference)))
     })
 })

@@ -79,6 +79,14 @@ describe('Native analysis cache regressions', function() {
 describe('Imported boards with native case objects', function() {
     this.timeout(120000)
     const assets = {'board.kicad_pcb': importedBoard}
+    it('uses rotated body contours for mounting clearance', async () => {
+        const input = imported()
+        input.layout.objects.battery.placement.rotate = 45
+        const result = await engine.process(input, {analysis:true,assets})
+        const model = result.designs.features['components.native_battery'].model
+        const perimeter = g.paths(model).reduce((sum,path)=>sum+require('makerjs').measure.pathLength(path),0)
+        assert.ok(Math.abs(perimeter - 36) < 0.001, 'A rotated 10 x 8 body keeps its actual contour')
+    })
     it('retains imported components and appends native bodies and openings', async () => {
         const result = await engine.process(imported(), {analysis: true, assets})
         const spec = result.designs.analysis.keyboard.parameters

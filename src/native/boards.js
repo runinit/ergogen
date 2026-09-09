@@ -61,7 +61,10 @@ const attach = (config,boards,context) => {
                 const relative=f.multiply(f.inverse(scene.assemblyFrame(id)),f.multiply(item.matrix,f.local(body.at || [0,0,0],body.rotate || 0)))
                 const localItem={...item,matrix:relative}
                 const bounds=geometry.bounds(localItem,{...body,at:[0,0,0],rotate:0})
-                const model=m.model.moveRelative(new m.models.Rectangle(bounds[1][0]-bounds[0][0],bounds[1][1]-bounds[0][1]),bounds[0].slice(0,2))
+                // Preserve in-plane body contours so rotated keys leave usable mounting space.
+                const model=Math.abs(Math.abs(relative[10])-1)<=g.EPSILON
+                    ? geometry.project(localItem,{...body,at:[0,0,0],rotate:0})
+                    : m.model.moveRelative(new m.models.Rectangle(bounds[1][0]-bounds[0][0],bounds[1][1]-bounds[0][1]),bounds[0].slice(0,2))
                 next.components[key]={size:body.size,radius:body.radius,height:[bounds[0][2],bounds[1][2]],anchor:{shift:[0,0]},motion:item.motion,
                     native:{matrix:relative,object:item.id,envelope:body}}
                 publish(ref,model,item.sourcePath)

@@ -6,6 +6,7 @@ const DEFAULT_HOLE = 1.2
 const DEFAULT_POST_HEIGHT = 5
 const DEGREES = 180 / Math.PI
 const TANGENT_STEP = 0.0001
+const CORNER_CLEARANCE = 3
 const overlap = require('./overlap')
 
 // Suggestions remain declarations; callers explicitly accept their stable anchors.
@@ -47,7 +48,8 @@ exports.suggest = (spec, context) => {
     let serial = 0
     for (const edge of g.paths(base)) {
         const length = m.measure.pathLength(edge)
-        if (length < size[0]) { continue }
+        // Flat contacts need a straight support span and room before each corner.
+        if (edge.type !== 'line' || length < size[0] + 2 * CORNER_CLEARANCE) { continue }
         const count = Math.max(1, Math.floor(length / Math.max(spacing, size[0])))
         for (let index = 0; index < count; index++) {
             const id = `gasket_${++serial}`, t = (index + 0.5) / count
