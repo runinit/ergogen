@@ -295,22 +295,11 @@ exports.compile = async (config, context, options = {}) => {
             const board = context.boards?.[id]
             for (const component of board?.components || []) {
                 activeFeature = `${name}.board.models.${component.id}`
-                const association=s.board?.models?.[component.id]
-                if (!association?.asset) { continue }
-                const source=options.assets?.[association.asset]
-                if (!source) { g.fail(`${name}.board`, `Missing model asset ${association.asset}`) }
                 const key=`components_board_${id}_${component.id.replace(/[^A-Za-z0-9_]/g,'_')}`
                 if (!extras[key]) { continue }
-                let imported
-                if (/\.(step|stp)$/i.test(association.asset)) { imported=await kernel.import(source) }
-                else {
-                    const metadata=options.assets?.[`__model_${association.asset}.json`]
-                    const mesh=metadata?JSON.parse(metadata).stl:/\.stl$/i.test(association.asset)?source:null
-                    if (!mesh) { g.fail(`${name}.board.models.${component.id}`,'Import this mesh in Components before generating its STEP reference.','missing-asset') }
-                    const bytes=mesh.startsWith('base64:')?Uint8Array.from(atob(mesh.slice(7)),char=>char.charCodeAt(0)):new TextEncoder().encode(mesh)
-                    imported=await kernel.importMesh(bytes)
-                }
-                extras[key]=kernel.placeModel(imported, association, component, s.pcb_z+(component.side === 'top' ? board.thickness : 0))
+                const model = await require('./native-models').place(kernel, component, options.assets || {},
+                    s.pcb_z + (component.side === 'top' ? board.thickness : 0), activeFeature)
+                if (model) { extras[key] = model }
             }
 
             // Rotate the complete mechanical stack, then trim the bottom to a flat datum.

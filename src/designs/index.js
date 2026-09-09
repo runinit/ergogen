@@ -6,10 +6,26 @@ const Point = require('../point')
 const g = require('./geometry')
 
 const sections = ['regions', 'boundaries', 'sketches', 'profiles', 'components', 'assemblies']
+const analysisCache = new WeakMap()
 const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key)
 
 exports.parse = async (config, points, outlines, units, options = {}) => {
     a.unexpected(config, 'designs', sections)
+    const cached = options.analysis && options.analysisCache && analysisCache.get(options.analysisCache)
+    if (cached && cached.key === options.analysisKey) {
+        const assemblies = Object.fromEntries(Object.entries(cached.config.assemblies).map(([id, spec]) => {
+            const next = {...spec}
+            for (const key of ['mounts', 'gaskets', 'mount_count', 'spacing']) {
+                delete next[key]
+                if (own(config.assemblies[id], key)) { next[key] = config.assemblies[id][key] }
+            }
+            return [id, next]
+        }))
+        const analysis = require('./enclosure-analysis').analyze({...cached.config, assemblies}, cached.context)
+        for (const [id, board] of Object.entries(cached.context.boards)) { analysis[id]?.findings.push(...board.findings) }
+        return {...cached.result, report:{...cached.result.report, analysis}}
+    }
+
     // Imported outlines also feed the wizard thumbnails before its generated regions resolve.
     config = {...config,regions:{...config.regions}}
     outlines = {...outlines}
@@ -207,7 +223,11 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
     report.analysis = require('./enclosure-analysis').analyze(config, {resolve, locate, shape, units, boards})
     for (const [id, board] of Object.entries(boards)) { report.analysis[id]?.findings.push(...board.findings) }
     if (options.analysis) {
-        return {outlines: generated, cases, report, solids: {}}
+        const result = {outlines: generated, cases, report, solids: {}}
+        if (options.analysisCache && options.analysisKey) {
+            analysisCache.set(options.analysisCache, {key:options.analysisKey, config, context:{resolve, locate, shape, units, boards}, result})
+        }
+        return result
     }
     const earlyCodes = ['mounting','mounting-conflict','seam','disconnected','edge-reference','component-height']
     const early = Object.entries(report.analysis).flatMap(([id,plan])=>plan.findings.filter(f=>f.severity==='error'&&(config.assemblies[id].board||earlyCodes.includes(f.code))))

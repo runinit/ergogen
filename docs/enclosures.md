@@ -5,6 +5,8 @@ shells, a switch plate, and reference geometry. The solid model supplies both
 STEP and STL. Legacy `cases` and the existing layered presets remain supported.
 
 See [BHK](examples/enclosure-bhk.yaml) for a real layout.
+[Footprint tools](footprint-tools.md) documents reusable imports and multiple model
+bindings used by board-linked cases.
 
 ```yaml
 points:
@@ -222,3 +224,20 @@ assembly reference with a 0.01 mm meshing tolerance.
 Middle frames have clearance bores; case-closing threads belong to the top
 cover. Exploded views place that cover above the plate and middle frame.
 Screws are separate reference solids; threads remain manufacturing metadata.
+
+### Optional component setup and contact counts
+
+Missing component dimensions are warnings. Their bodies are omitted from the
+clearance calculation; successful generation does not validate those bodies.
+Known envelopes and supplied model associations still participate normally.
+
+`mount_count` requests a total contact count for the selected mounting system,
+including manual contacts. Automatic candidates spread over clear perimeter
+spans; closing screws remain separate. If the requested count cannot fit, a
+`mount-count` finding reports the available count. Omit it for 40 mm spacing.
+Tray mounting distributes the requested supports among existing PCB holes.
+More supports require explicit acceptance of suitable new PCB holes.
+
+Worker callers can pass a stable `analysisCache` object with `analysis: true`.
+Mount/gasket/spacing/count edits reuse contours. Other configuration or asset
+changes invalidate the cache. Solid compilation never uses it.

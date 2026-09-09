@@ -81,7 +81,11 @@ exports.attach = (config, boards, context) => {
         const unresolved = []
         for (const component of board.components) {
             if (!component.populated) { continue }
-            const override = input.board.components?.[component.id] || {}
+            // Keep the original asset identity when a portable KiCad path uses another format.
+            const bindings = input.board.models?.[component.id]
+            if (bindings !== undefined) { component.models = Array.isArray(bindings) ? bindings : [bindings] }
+            const measured = require('../footprint-tools').envelope(component.models,context.assets)
+            const override = {...measured, ...input.board.components?.[component.id]}
             const rawSize = override.size || component.size, rawHeight = override.height || component.height
             let size, height
             try {
@@ -92,7 +96,7 @@ exports.attach = (config, boards, context) => {
                     if (height[1]<=height[0]) { height=null }
                 }
             } catch { size=null; height=null }
-            if (!size || !height) { unresolved.push({feature:`designs.assemblies.${id}.board.components.${component.id}`,code:'component-height',severity:'error',message:`${component.reference}: missing body size or height.`,action:'Import a model or enter the measured envelope in Components.'}); continue }
+            if (!size || !height) { unresolved.push({feature:`designs.assemblies.${id}.board.components.${component.id}`,code:'component-height',severity:'warning',message:`${component.reference}: missing body size or height; component clearance is not validated.`,action:'Import a model or enter the measured envelope in Components.'}); continue }
             const key = `board_${id}_${component.id.replace(/[^A-Za-z0-9_]/g,'_')}`
             const low = component.side === 'top' ? pcbZ+board.thickness+height[0] : pcbZ-height[1]
             const high = component.side === 'top' ? pcbZ+board.thickness+height[1] : pcbZ-height[0]
@@ -128,7 +132,9 @@ exports.attach = (config, boards, context) => {
             unresolved.push({feature:`designs.assemblies.${id}.board.family`,code:'switch-family',severity:'error',message:'Choose the switch family for the layout reference board.',action:'Choose MX, Choc v1, or Choc v2 in Layout.'})
         }
         for (const [ref,association] of Object.entries(input.board.models || {})) {
-            if (association.asset && !context.assets?.[association.asset]) { unresolved.push({feature:`designs.assemblies.${id}.board.models.${ref}`,code:'missing-asset',severity:'error',message:`Missing model asset ${association.asset}.`,action:'Import the model or reopen the packaged project.'}) }
+            for (const model of Array.isArray(association) ? association : [association]) {
+                if (model.asset && !context.assets?.[model.asset]) { unresolved.push({feature:`designs.assemblies.${id}.board.models.${ref}`,code:'missing-asset',severity:'error',message:`Missing model asset ${model.asset}.`,action:'Import the model or reopen the packaged project.'}) }
+            }
         }
         if (board.components.some(c=>c.populated&&c.family) && !input.board.keycaps) {
             unresolved.push({feature:`designs.assemblies.${id}.board.keycaps`,code:'keycaps',severity:'warning',message:'Keycap dimensions are unresolved; keycap clearance has not been validated.',action:'Enter the measured keycap envelope in Components.'})

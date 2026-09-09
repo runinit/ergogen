@@ -3,14 +3,27 @@ const g = require('./geometry')
 const {suggest} = require('./mounts')
 const SPACING = 40
 const TAB_ENGAGEMENT = 0.5
-const intersects = (a,b) => !g.empty(g.combine(a,b,'intersect'))
+const overlap = require('./overlap')
 const M3 = {post: 4, hole: 1.25, clearance: 1.7, head: 3.1, head_depth: 3.3,
     hardware: 'tapped', thread: 'M3x0.5', depth: 6, access: 'bottom', min_wall: 1.5,
     screw: {diameter:3,head_diameter:5.5,head_height:3}}
 
+// Greedily fill the largest gaps, using fixed manual contacts as the starting set.
+const spread = (items, count, manual, center) => {
+    const pool = [...items], selected = [], occupied = manual.map(p=>p.position)
+    while (pool.length && selected.length < count) {
+        const distance = p => occupied.length ? Math.min(...occupied.map(q=>m.measure.pointDistance(q,p.position))) : m.measure.pointDistance(center,p.position)
+        pool.sort((a,b)=>distance(b)-distance(a))
+        const item = pool.shift()
+        selected.push(item); occupied.push(item.position)
+    }
+    return selected
+}
+
 // Resolve the editable plan before native CAD; incomplete cases still have a useful outline.
 exports.analyze = (config, context) => {
     const {resolve, locate, shape, units} = context
+    const intersects = overlap()
     const output = {}
     for (const [id, input] of Object.entries(config.assemblies || {})) {
         if (input.preset !== 'enclosure') { continue }
@@ -44,7 +57,7 @@ exports.analyze = (config, context) => {
             const floating = input.mounting === 'gasket'
             if (floating && input.ledge) { issue('ledge', 'mounting-conflict', 'A rigid ledge clamps the floating plate.', 'Remove the ledge in Advanced / Manual.') }
             const movement = floating ? g.number(input.gasket?.travel_side ?? 0.1, name, units) : 0
-            const exclusions = (input.cutouts || []).map(ref => resolve(ref).model)
+            const exclusions = (input.cutouts || []).flatMap(ref => { const feature = resolve(ref); return feature.groups || [feature.model] })
             const components = (input.components || []).map(ref => ({model: g.offset(resolve(ref).model, movement),low:g.number(config.components[ref.split('.')[1]].height[0],name,units)}))
             const mounts = {}, gasketModels = []
             for (const [kind, table] of [['mount', input.mounts || {}], ['gasket', input.gaskets || {}]]) {
@@ -70,7 +83,10 @@ exports.analyze = (config, context) => {
             const manualGaskets = Object.fromEntries(Object.entries(input.gaskets || {}).filter(([,v]) => v.placement?.owner !== 'automatic'))
             const suggestionInput = {...input, mounts:manualMounts, gaskets:manualGaskets}
             const context2d = {base, exterior: g.offset(exterior, -wall), units, name, shape, mounts:manualMounts, exclusions, components, gasketModels:Object.values(manualGaskets).map(def=>shape(def,name)), height}
-            const spacing = dim('spacing', SPACING)
+            const requested = input.mount_count === undefined ? null : dim('mount_count', 0)
+            if (requested !== null && (!Number.isInteger(requested) || requested < 0 || requested > 200)) { g.fail(`${name}.mount_count`, 'Mount count must be an integer between 0 and 200') }
+            const manualContacts = placements.filter(p=>p.definition.placement?.owner!=='automatic' && p.definition.role!=='case')
+            const spacing = requested ? Math.min(dim('spacing', SPACING), Math.max(12, edges.reduce((sum,e)=>sum+e.length,0)/(requested*2))) : dim('spacing', SPACING)
             if (!floating) { record.alternatives = {gaskets:suggest({...suggestionInput,suggest:{gaskets:{spacing,size:[10,6]}}},context2d)} }
             if (floating) {
                 suggestions.push(...suggest({...suggestionInput, suggest: {gaskets: {spacing, size: [10, 6]}}}, context2d))
@@ -96,6 +112,13 @@ exports.analyze = (config, context) => {
                 if (!g.contains(context2d.exterior,envelope) || components.some(c=>intersects(c.model,envelope)) || exclusions.some(c=>intersects(c,envelope))) { suggestions.splice(index,1); continue }
                 acceptedContacts.push(item.position)
             }
+            // Spread the requested contacts across eligible spans, retaining manual placements.
+            if (requested !== null && input.mounting !== 'tray') {
+                const remaining = Math.max(0, requested - manualContacts.length)
+                const selected = spread(suggestions.splice(0), remaining, manualContacts, record.bounds.center)
+                suggestions.push(...selected)
+                if (selected.length < remaining || manualContacts.length > requested) { issue('mount_count','mount-count',`Requested ${requested} contacts; ${selected.length + manualContacts.length} fit with manual placements retained.`, 'Reduce the count, increase the bezel, or move manual contacts.', 'warning') }
+            }
             const occupiedGaskets = [...context2d.gasketModels, ...suggestions.filter(s => s.kind === 'gasket').map(s => shape(s.definition, name))]
             const closureBase = g.offset(base, bezel + wall - M3.post + 1)
             suggestions.push(...suggest({...suggestionInput, suggest: {spacing, inset: 1, post: M3.post, hole: M3.hole}},
@@ -110,6 +133,7 @@ exports.analyze = (config, context) => {
             }
             if (input.mounting === 'tray' && board) {
                 for (const hole of board.holes) {
+                    if (manualContacts.some(p=>m.measure.pointDistance(p.position,hole.position)<g.TOLERANCE)) { continue }
                     const definition = {role:'pcb',anchor:{shift:hole.position},hole:hole.diameter/2,post:Math.max(3,hole.diameter/2+1.5),depth:4,hardware:'plain',access:'top'}
                     const envelope = {paths:{post:new m.paths.Circle(hole.position,definition.post)}}
                     if (components.some(c => c.low<dim('pcb_z',6) && intersects(c.model,envelope))) { issue('board.holes','pcb-hole-clearance',`PCB hole ${hole.id} lacks clearance for its support.`, 'Choose another hole or reduce the support diameter.'); continue }
@@ -120,6 +144,14 @@ exports.analyze = (config, context) => {
                     record.holeProposals = proposals.filter(p=>require('./board-inventory').holeFits(board,p.position,2.2)).map(p=>({id:`PCB_${p.position.map(v=>Math.round(v*100)).join('_')}`,position:p.position,diameter:2.2})).filter(p=>!(input.board.rejected_holes || []).includes(p.id))
                     if (!board.holes.length) { issue('board.holes','pcb-holes','Tray mounting requires PCB support holes.', 'Review the proposed PCB holes in Hardware.') }
                 }
+            }
+            if (input.mounting === 'tray' && requested !== null) {
+                const existing = suggestions.filter(s=>s.definition.role==='pcb')
+                const remaining = Math.max(0, requested-manualContacts.length)
+                const selected = spread(existing, remaining, manualContacts, record.bounds.center)
+                const closures = suggestions.filter(s=>s.definition.role!=='pcb')
+                suggestions.splice(0, suggestions.length, ...closures, ...selected)
+                if (selected.length < remaining || manualContacts.length > requested) { issue('mount_count','mount-count',`Requested ${requested} supports; ${selected.length+manualContacts.length} existing PCB holes are available with manual placements retained.`, 'Review PCB hole proposals in Hardware or reduce the count.', 'warning') }
             }
             const candidates = suggestions.filter(s => s.kind === 'gasket')
             if (floating && !candidates.length && !gasketModels.length) { issue('gaskets', 'placement', 'No gasket contacts fit between the switches and walls.', 'Increase the boundary clearance or select another edge.') }

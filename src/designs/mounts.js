@@ -6,11 +6,12 @@ const DEFAULT_HOLE = 1.2
 const DEFAULT_POST_HEIGHT = 5
 const DEGREES = 180 / Math.PI
 const TANGENT_STEP = 0.0001
-const intersects = (left, right) => !g.empty(g.combine(left, right, 'intersect'))
+const overlap = require('./overlap')
 
 // Suggestions remain declarations; callers explicitly accept their stable anchors.
 exports.suggest = (spec, context) => {
     const {base, exterior, units, name, shape, mounts, exclusions, components, gasketModels, height} = context
+    const intersects = overlap()
     const settings = spec.suggest
     if (!settings) { return [] }
     a.unexpected(settings, `${name}.suggest`, ['spacing', 'inset', 'post', 'hole', 'height', 'gaskets'])

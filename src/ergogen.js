@@ -67,7 +67,17 @@ const process = async (raw, options={}, logger=()=>{}) => {
     const outlines = outlines_lib.parse(config.outlines || {}, points, units)
     let caseConfig = config.cases || {}
     if (config.designs) {
-        const design = await designs_lib.parse(config.designs, points, outlines, units, {...options,
+        // Placement edits can reuse contours; every other input invalidates this worker-local cache.
+        let analysisKey
+        if (options.analysis && options.analysisCache) {
+            const assemblies = Object.fromEntries(Object.entries(config.designs.assemblies || {}).map(([id, spec]) => {
+                const stable = {...spec}
+                if (spec.preset === 'enclosure') { for (const key of ['mounts', 'gaskets', 'mount_count', 'spacing']) { delete stable[key] } }
+                return [id, stable]
+            }))
+            analysisKey = JSON.stringify([{...config, designs:{...config.designs, assemblies}}, options.assets])
+        }
+        const design = await designs_lib.parse(config.designs, points, outlines, units, {...options, analysisKey,
             boardSources: generated => require('./designs/board-link').sources(config, {...outlines,...generated}, points, units, options.assets)})
         Object.assign(outlines, design.outlines)
         for (const name of Object.keys(design.cases)) {
@@ -135,5 +145,6 @@ const inject = (type, name, value) => {
 module.exports = {
     version,
     process,
-    inject
+    inject,
+    footprints: require('./footprint-tools')
 }

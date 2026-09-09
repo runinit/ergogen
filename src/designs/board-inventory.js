@@ -57,8 +57,7 @@ exports.read = source => {
         const courtyards = m.measure.modelExtents(local)
         const family = /choc.*v?2/i.test(footprint) ? 'choc-v2' : /choc/i.test(footprint) ? 'choc-v1' : /(?:switch.*mx|sw_mx)/i.test(footprint) ? 'mx' : null
         const size = courtyards ? [courtyards.width,courtyards.height] : family ? [15,15] : null
-        const models = children(fp,'model').map(node => ({path:text(node[1]), offset:nums(child(child(node,'offset'),'xyz')).concat([0,0,0]).slice(0,3),
-            scale: child(node,'scale').length ? nums(child(child(node,'scale'),'xyz')) : [1,1,1], rotate:nums(child(child(node,'rotate'),'xyz')).concat([0,0,0]).slice(0,3)}))
+        const models = require('../footprint-tools').inspect(sexpr.print(fp)).models
         const item = {id, reference, footprint, position:xy(at), rotation:Number(at[3]||0), side, family, size, body_offset:courtyards?.center || [0,0],
             height:family === 'mx' ? [0,11.6] : family ? [0,6.5] : null, models,
             populated: !child(fp,'attr').includes('dnp') && !child(fp,'dnp').includes('yes')}
@@ -93,13 +92,7 @@ exports.holeFits = (inventory, position, diameter) => {
     return !inventory.holes.some(h => m.measure.pointDistance(h.position,position)<radius+h.diameter/2)
 }
 exports.associate = (source, id, model) => {
-    const root = sexpr.parse(source,'PCB model association')[0]
-    const fp = [...children(root,'footprint'),...children(root,'module')].find(fp => text(child(fp,'uuid')[1]||child(fp,'tstamp')[1])===id || children(fp,'property').some(p=>text(p[1])==='Reference'&&text(p[2])===id))
-    if (!fp) { throw new Error(`The footprint ${id} no longer exists.`) }
-    const entry = `(model ${sexpr.quote(model.path)} (offset (xyz ${model.offset.join(' ')})) (scale (xyz ${model.scale.join(' ')})) (rotate (xyz ${model.rotate.join(' ')})))`
-    const existing = child(fp,'model')
-    const [start,end] = existing.range || [fp.range[1]-1,fp.range[1]-1]
-    return source.slice(0,start)+entry+source.slice(end)
+    return require('../footprint-tools').models(source, model, {id})
 }
 exports.addHole = (source, hole) => {
     const inventory = exports.read(source)

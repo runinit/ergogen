@@ -56,3 +56,51 @@ it('returns a source path and repair action for dimension errors', () => {
         return true
     })
 })
+
+it('honours a requested contact count and retains separate closing screws', async () => {
+    const input=fixture()
+    input.designs.assemblies.case.mount_count=2
+    const result=await engine.process(input,{analysis:true})
+    assert.equal(result.designs.analysis.case.suggestions.filter(s=>s.kind==='gasket').length,2)
+    assert.ok(result.designs.analysis.case.suggestions.some(s=>s.definition.role==='case'))
+})
+
+it('counts manual contacts without relocating them and reports excess requests', async () => {
+    const input=fixture(), spec=input.designs.assemblies.case
+    const initial=(await engine.process(input,{analysis:true})).designs.analysis.case
+    const contact=initial.suggestions.find(s=>s.kind==='gasket')
+    spec.gaskets={manual:{...contact.definition,placement:{...contact.definition.placement,owner:'manual'}}}
+    spec.mount_count=2
+    const plan=(await engine.process(input,{analysis:true})).designs.analysis.case
+    assert.equal(plan.suggestions.filter(s=>s.kind==='gasket').length,1)
+    assert.ok(plan.placements.find(s=>s.id==='manual').position.every((v,i)=>Math.abs(v-contact.position[i])<1e-8))
+    spec.mount_count=200
+    const crowded=(await engine.process(input,{analysis:true})).designs.analysis.case
+    assert.ok(crowded.findings.some(f=>f.code==='mount-count'))
+})
+
+it('reuses resolved outlines for mounting edits and invalidates on layout changes', async () => {
+    const input=fixture(), cache={}, g=require('../../src/designs/geometry'), original=g.describe
+    let descriptions=0
+    g.describe=(...args)=>{ descriptions++; return original(...args) }
+    try {
+        await engine.process(input,{analysis:true,analysisCache:cache})
+        const first=descriptions
+        input.designs.assemblies.case.mount_count=2
+        const result=await engine.process(input,{analysis:true,analysisCache:cache})
+        assert.equal(descriptions,first)
+        assert.equal(result.designs.analysis.case.suggestions.filter(s=>s.kind==='gasket').length,2)
+        input.designs.profiles.board.clearance=3
+        await engine.process(input,{analysis:true,analysisCache:cache})
+        assert.ok(descriptions>first)
+    } finally { g.describe=original }
+})
+
+it('limits tray supports to the requested count of existing PCB holes', async () => {
+    const input=fixture(), spec=input.designs.assemblies.case
+    spec.mounting='tray';spec.mount_count=1;spec.board={source:'asset',name:'board.kicad_pcb'}
+    const source='(kicad_pcb (general (thickness 1.6)) (gr_rect (start 0 0) (end 80 40) (layer "Edge.Cuts")) '+[10,70].map((x,i)=>`(footprint "MountingHole:M2" (layer "F.Cu") (at ${x} 20) (property "Reference" "H${i}") (pad "" np_thru_hole circle (at 0 0) (size 2.2 2.2) (drill 2.2)))`).join(' ')+')'
+    const result=await engine.process(input,{analysis:true,assets:{'board.kicad_pcb':source}})
+    assert.equal(result.designs.analysis.case.suggestions.filter(s=>s.definition.role==='pcb').length,1)
+    assert.equal(result.designs.boards.case.holes.length,2)
+})

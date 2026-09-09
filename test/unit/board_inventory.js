@@ -90,3 +90,12 @@ it('identifies a PCB-to-enclosure outline dependency cycle before CAD',async()=>
         return true
     })
 })
+
+it('allows unresolved component envelopes while keeping clearance visibly incomplete', async () => {
+    const input={points:{zones:{keys:{}}},designs:{regions:{keys:{where:true}},profiles:{board:{from:'regions.keys'}},assemblies:{case:{preset:'enclosure',profile:'profiles.board',mounting:'bottom',board:{source:'asset',name:'board.kicad_pcb'},height:24,bezel:10}}}}
+    const result=await require('../../src/ergogen').process(input,{analysis:true,assets:{'board.kicad_pcb':source.replace('Switch:SW_MX','Custom:Unknown')}})
+    const findings=result.designs.boards.case.findings.filter(f=>f.code==='component-height')
+    assert.equal(findings.length,1)
+    assert.equal(findings[0].severity,'warning')
+    assert.match(findings[0].message,/not validated/)
+})

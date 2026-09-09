@@ -82,6 +82,7 @@ exports.open = async (options = {}) => {
     }
     return {
         extrude,
+        compound: shapes => shapes.length === 1 ? shapes[0] : keep(r.makeCompound(shapes)),
         add: (left, right) => keep(left.fuse(right)),
         cut: (left, right) => keep(left.cut(right)),
         intersect: (left, right) => keep(left.intersect(right)),

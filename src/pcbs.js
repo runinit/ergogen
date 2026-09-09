@@ -156,7 +156,10 @@ const footprint = exports._footprint = (points, net_indexer, component_indexer, 
         return net_obj(net, index)
     }
 
-    return fp.body(parsed_params)
+    const emitted = fp.body(parsed_params)
+    if (!fp.modelBindings) { return emitted }
+    const binding = typeof fp.modelBindings === 'function' ? fp.modelBindings(parsed_params) : fp.modelBindings
+    return require('./footprint-tools').models(emitted, binding.models || binding, binding.target)
 }
 
 exports.parse = (config, points, outlines, units) => {

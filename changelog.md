@@ -1,3 +1,16 @@
+## Reusable footprints and model bindings
+
+- Inspect and convert KiCad footprints with source-preserving geometry and net mapping.
+- Add declarative multiple-model bindings without changing dynamic footprint modules.
+- Derive transformed envelopes and native assembly bodies from cached STEP, STL and VRML.
+- Preserve metadata, legacy offset units, back-side placement and per-placement UUIDs.
+
+## Guided enclosure follow-up
+
+- Keep unknown component dimensions as explicit incomplete-clearance warnings.
+- Distribute requested contact counts while preserving manual placements.
+- Reuse resolved contours for mount-only edits with a worker-local cache.
+
 ## Guided enclosure analysis
 
 - Analyze board outlines, component inventory and mounting candidates before CAD.
