@@ -31,7 +31,7 @@ const attach = (config,boards,context) => {
     }
     for (const [id,input] of Object.entries(config.assemblies || {})) {
         if (input.preset!=='enclosure') { continue }
-        const spec=next.assemblies[id]={...input,components:[],openings:[],cutouts:[...(input.cutouts || [])],native:true}
+        let spec=next.assemblies[id]={...input,components:[],openings:[],cutouts:[...(input.cutouts || [])],native:true}
         spec.front_height=input.front_height ?? scene.number(input.height ?? 24,'height')*Math.cos(scene.number(input.typing_angle || 0,'typing_angle')*f.RAD)
         const board=boards[id]
         if (board?.native) {
@@ -47,8 +47,8 @@ const attach = (config,boards,context) => {
             if (!board.native) {
                 const imported=require('../designs/board-link').attach({assemblies:{[id]:spec}}, {[id]:board}, context)
                 Object.assign(next.components,imported.components)
-                next.assemblies[id]=imported.assemblies[id]
-                continue
+                // Append independent case objects to the imported assembly, retaining its PCB components and cutouts.
+                spec=next.assemblies[id]=imported.assemblies[id]
             }
         }
         for (const item of Object.values(scene.objects)) {

@@ -204,16 +204,31 @@ checks actual modeled shell intersections. Missing physical measurements remain
 visible findings; successful software generation is not physical-fit evidence.
 Case height is authored: a fit conflict never silently resizes the enclosure.
 
+Imported PCB assemblies retain their board components, models, and cutouts, then
+append applicable native bodies and service openings. Independent mounting
+layers therefore reach clearance analysis and solid generation for imported and
+generated boards alike. Adding a case object does not rewrite imported copper.
+
 ## Source editing and lifecycle
 
 Document transactions patch local source ranges. Moving a generated member
 changes its override, not sibling positions or arrangement formulas. One drag is
 one undo operation. Shared aliases are not modified when an instance is edited.
+Movement materializes the selected alias before reading its existing override,
+so inherited offsets and formulas survive the first edit.
 Locks affect editing; visibility and exploded offsets affect presentation only.
 
 Worker requests carry source, library, injection, and asset revisions. Only a
 matching result is current. Lightweight analysis runs during editing; full CAD
 is explicit. Stale results cannot be exported as current output.
+
+The analysis cache retains an internal board bundle: generated PCB inventories,
+assembly board sources, and PCB findings. PCB outputs come from this result,
+including boards without assemblies, rather than callback side effects. Cache
+hits reuse contours and PCB compilation while recalculating mounting findings
+and combining current layout findings with cached PCB findings exactly once.
+Each response receives separate diagnostic arrays. Layout, dimension, and asset
+changes invalidate the cache; mounting-only edits retain clearance blockers.
 
 ## Packaging and verification
 

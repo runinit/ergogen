@@ -4,10 +4,19 @@ const filter = require('../filter')
 const anchor = require('../anchor').parse
 const Point = require('../point')
 const g = require('./geometry')
+const {deepcopy} = require('../utils')
 
 const sections = ['regions', 'boundaries', 'sketches', 'profiles', 'components', 'assemblies']
 const analysisCache = new WeakMap()
 const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key)
+
+// Cache board checks with their geometry, but rebuild layout and mounting findings per request.
+const appendFindings = (analysis, boards, scene, boardFindings = []) => {
+    if (scene) { scene.findings.push(...deepcopy(boardFindings)) }
+    for (const [id, plan] of Object.entries(analysis)) {
+        plan.findings.push(...deepcopy(boards[id]?.findings || []), ...deepcopy(scene?.findings || []))
+    }
+}
 
 exports.parse = async (config, points, outlines, units, options = {}) => {
     a.unexpected(config, 'designs', sections)
@@ -22,7 +31,7 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
             return [id, next]
         }))
         const analysis = require('./enclosure-analysis').analyze({...cached.config, assemblies}, cached.context)
-        for (const [id, board] of Object.entries(cached.context.boards)) { analysis[id]?.findings.push(...board.findings) }
+        appendFindings(analysis, cached.context.boards, options.scene, cached.result.boardBundle?.findings)
         return {...cached.result, report:{...cached.result.report, analysis}}
     }
 
@@ -247,7 +256,9 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
     for (const section of sections.filter(section => section !== 'assemblies')) {
         for (const id of Object.keys(config[section] || {})) { resolve(`${section}.${id}`) }
     }
-    const boards = options.boardSources ? options.boardSources(generated) : {}
+    const boardSources = options.boardSources ? options.boardSources(generated) : {}
+    const boardBundle = options.scene ? boardSources : undefined
+    const boards = boardBundle ? boardBundle.boards : boardSources
     config = options.scene ? require('../native/boards').attach(config, boards, {resolved, features, units, shape, scene:options.scene, assets:options.assets}) : require('./board-link').attach(config, boards, {resolved, features, units, shape, assets:options.assets})
     report.boards = boards
     if (Object.keys(config.assemblies || {}).length) {
@@ -256,10 +267,9 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         assemblies.compile({...config, assemblies: legacy}, {resolve, locate, shape, publish, units, cases, report, outlines: generated})
     }
     report.analysis = require('./enclosure-analysis').analyze(config, {resolve, locate, shape, units, boards})
-    for (const [id, board] of Object.entries(boards)) { report.analysis[id]?.findings.push(...board.findings) }
-    for (const plan of Object.values(report.analysis)) { plan.findings.push(...(options.scene?.findings || [])) }
+    appendFindings(report.analysis, boards, options.scene, boardBundle?.findings)
     if (options.analysis) {
-        const result = {outlines: generated, cases, report, solids: {}}
+        const result = {outlines: generated, cases, report, solids: {}, boardBundle}
         if (options.analysisCache && options.analysisKey) {
             analysisCache.set(options.analysisCache, {key:options.analysisKey, config, context:{resolve, locate, shape, units, boards}, result})
         }
@@ -273,5 +283,5 @@ exports.parse = async (config, points, outlines, units, options = {}) => {
         if (errors.length) { const error = new Error(errors.map(f => f.message).join(' ')); error.diagnostics = errors; throw error }
     }
     const solids = await require('./enclosures').compile(config, {resolve, locate, shape, publish, units, cases, report, boards}, options)
-    return {outlines: generated, cases, report, solids}
+    return {outlines: generated, cases, report, solids, boardBundle}
 }

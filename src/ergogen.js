@@ -55,9 +55,13 @@ const compile = async (raw, options={}, logger=()=>{}) => {
             scene, region: (spec, path) => geometry.region(scene, spec, path),
             shape: (spec,path,point) => geometry.project({matrix:require('./native/frames').local([point.x,point.y,0],point.r),sourcePath:path},scene.envelope(spec,path)),
             boardSources: generated => {
-                nativeBoards = require('./native/pcbs').compile(config, scene, {...outlines,...generated}, points)
-                return require('./native/boards').sources(config, nativeBoards, options.assets || {})
+                const previousFindings = scene.findings.length
+                const generatedBoards = require('./native/pcbs').compile(config, scene, {...outlines,...generated}, points)
+                const findings = scene.findings.splice(previousFindings)
+                const boards = require('./native/boards').sources(config, generatedBoards, options.assets || {})
+                return {boards, generatedBoards, findings}
             }})
+        nativeBoards = design.boardBundle?.generatedBoards || {}
         Object.assign(outlines, design.outlines)
         for (const name of Object.keys(design.cases)) {
             if (Object.prototype.hasOwnProperty.call(caseConfig, name)) {
