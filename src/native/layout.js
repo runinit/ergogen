@@ -5,7 +5,8 @@ const own = (map,key) => Object.prototype.hasOwnProperty.call(map,key)
 const KINDS = ['key','component','mount','anchor']
 
 // Resolve nominal placement independently from the physical support's motion group.
-const resolve = config => {
+const resolve = (config, offsets = {}) => {
+    const placements = {}
     const values = {}, pending = new Set()
     const number = (value,path) => {
         if (typeof value === 'number') { return g.number(value,path) }
@@ -33,7 +34,7 @@ const resolve = config => {
         return owners[0]
     }
     const frame = (matrix, owner='fixed', layer='world') => ({matrix,position:f.position(matrix),motion:owner,layer,motionGroup:layer})
-    const world = frame(f.identity())
+    const world = {...frame(f.identity()), key: 'world'}
     const placed = (spec={}, base=world, path='placement', support) => {
         let parent=base
         if (spec.ref) {
@@ -45,10 +46,13 @@ const resolve = config => {
             parent={...support,matrix:f.multiply(support.matrix,f.local([relative[3],relative[7],0],f.yaw(relative)))}
         }
         const at=vector(spec.at,`${path}.at`)
-        const override=vector(spec.override?.at,`${path}.override.at`)
-        const angle=number(spec.rotate || 0,`${path}.rotate`)+number(spec.override?.rotate || 0,`${path}.override.rotate`)
+        const delta=offsets[path] || {at:[0,0,0],rotate:0}
+        const override=vector(spec.override?.at,`${path}.override.at`).map((value,index)=>value+delta.at[index])
+        const angle=number(spec.rotate || 0,`${path}.rotate`)+number(spec.override?.rotate || 0,`${path}.override.rotate`)+delta.rotate
         const result=frame(f.multiply(parent.matrix,f.local(at.map((v,i)=>v+override[i]),angle,number(spec.tilt || 0,`${path}.tilt`))),base.motion,base.layer)
         result.editMatrix=parent.matrix
+        result.key=path.replace(/^layout\./,'').replace(/\.placement$/,'').replace('.attachments.','.')
+        placements[result.key]={path,spec,parent:parent.key || 'world',editMatrix:parent.matrix,matrix:result.matrix}
         return result
     }
     const guarded = (key, build) => {
@@ -121,7 +125,9 @@ const resolve = config => {
             if (spec.mirror) {
                 const original=cluster(spec.mirror.source), axis=number(spec.mirror.axis,`layout.clusters.${id}.mirror.axis`)
                 result.mirrorBase=f.local([2*axis-original.position[0],original.position[1],original.position[2]],-f.yaw(original.matrix))
-                Object.assign(result,placed(spec.placement,{...result,matrix:result.mirrorBase},`layout.clusters.${id}.placement`))
+                const key=`mirror.clusters.${id}`
+                placements[key]={mirror:`clusters.${spec.mirror.source}`,axis,matrix:result.mirrorBase}
+                Object.assign(result,placed(spec.placement,{...result,key,matrix:result.mirrorBase},`layout.clusters.${id}.placement`))
             }
             clusters[id]=result
             return result
@@ -151,7 +157,9 @@ const resolve = config => {
             if (!(x>=0 && y>=0)) { g.fail(`layout.objects.${id}.cell`,'Choose a declared column and row','reference') }
             const pitch=vector(definition.pitch || [19,19],`${path}.pitch`,2)
             const stagger=number(definition.stagger?.[col] || 0,`${path}.stagger.${col}`)
-            return f.local([x*pitch[0],y*pitch[1]+stagger,0],number(definition.splay?.[col] || 0,`${path}.splay.${col}`))
+            const offset=vector(definition.offsets?.[col] || [0,0,0],`${path}.offsets.${col}`,3)
+            const column=f.local([x*pitch[0]+offset[0],stagger+offset[1],offset[2]],number(definition.splay?.[col] || 0,`${path}.splay.${col}`))
+            return f.multiply(column,f.local([0,y*pitch[1],0]))
         }
         if (spec.index===undefined) { g.fail(`layout.objects.${id}.index`,'Arc members need an explicit index') }
         const angle=number(definition.start || 0,`${path}.start`)+spec.index*number(definition.step ?? 15,`${path}.step`)
@@ -172,7 +180,17 @@ const resolve = config => {
             }
             const mount=layer(spec.layer || config.layout.clusters?.[spec.cluster]?.layer || 'world')
             const parent=spec.cluster ? cluster(spec.cluster) : mount
-            const base={...parent,matrix:f.multiply(parent.matrix,generated[id]?f.identity():arrangement(spec,id))}
+            let base={...parent,matrix:f.multiply(parent.matrix,generated[id]?f.identity():arrangement(spec,id))}
+            if (generated[id]) {
+                const sourceId=id.slice(spec.cluster.length+2), clusterSpec=config.layout.clusters[spec.cluster]
+                const original=object(sourceId), axis=number(clusterSpec.mirror.axis,`layout.clusters.${spec.cluster}.mirror.axis`)
+                const key=`mirror.objects.${id}`
+                const reflected=f.local([2*axis-original.position[0],original.position[1],original.position[2]],-original.rotation)
+                placements[key]={mirror:`objects.${sourceId}`,axis,matrix:reflected}
+                // The generator already expressed mirror placement in cluster coordinates.
+                // Solver ancestry instead follows the original object, including its edits.
+                base={...base,key}
+            }
             const result=placed(spec.placement,base,`${path}.placement`,spec.layer || config.layout.clusters?.[spec.cluster]?.layer ? mount : undefined)
             result.layer=mount.layer
             result.motion=mount.motion
@@ -207,8 +225,14 @@ const resolve = config => {
                 }
                 footprints[key] = binding
             }
-            const metadata={...spec.properties}
-            objects[id]={...result,id,label:spec.label || id,kind:spec.kind,part:spec.part,revision:part.revision,cluster:spec.cluster,
+            const nets=spec.kind==='key' ? {column_net:spec.cell?`${spec.cluster}_${spec.cell[0]}`:`${id}_column`,row_net:spec.cell?`${spec.cluster}_${spec.cell[1]}`:spec.cluster?`${spec.cluster}_row`:`${id}_row`} : {}
+            const metadata={...nets,...spec.properties}
+            if (generated[id]) {
+                placements[`objects.${id}`]=placements[result.key]
+                delete placements[result.key]
+                result.key=`objects.${id}`
+            }
+            objects[id]={...result,id,label:spec.label || id,kind:spec.kind,part:spec.part,revision:part.revision,cluster:spec.cluster,cell:spec.cell,index:spec.index,
                 pcb:spec.pcb,side:spec.side || 'top',locked:!!spec.locked || !!parent.locked,envelopes,properties:metadata,
                 footprints,models:spec.models || part.models || [],sourcePath:path,assembly:mount.assembly,
                 attachments:{...part.attachments,...spec.attachments},rotation:f.yaw(result.matrix)}
@@ -255,7 +279,7 @@ const resolve = config => {
     for (const id of Object.keys(config.layout.layers || {})) { layer(id) }
     for (const id of Object.keys(config.layout.clusters || {})) { cluster(id) }
     for (const id of Object.keys(definitions)) { object(id) }
-    const scene={objects,clusters,layers,units:values,findings,number,envelope,reference,boardFrame,assemblyFrame}
+    const scene={objects,clusters,layers,units:values,findings,number,envelope,reference,boardFrame,assemblyFrame,placements}
     findings.push(...require('./clearance').check(config,scene))
     return scene
 }

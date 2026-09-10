@@ -6,6 +6,7 @@ export interface Placement {
   at?: [Dimension, Dimension, Dimension];
   rotate?: Dimension;
   tilt?: Dimension;
+  solve?: ('x' | 'y' | 'rotate')[];
   above?: string;
   below?: string;
   gap?: Dimension;
@@ -27,7 +28,7 @@ export interface ResolvedObject extends ResolvedFrame {
   id: string; label: string; kind: ObjectKind; part?: string; revision?: string;
   cluster?: string; pcb?: string; side: 'top' | 'bottom'; locked: boolean;
   envelopes: Record<string, Envelope>; bounds: Record<string, [Vec3, Vec3]>;
-  rotation: number; sourcePath: string;
+  rotation: number; sourcePath: string; cell?: string[]; index?: number; properties?: Record<string, unknown>;
 }
 export interface ResolvedCluster extends ResolvedFrame {
   id: string; label: string; locked: boolean;
@@ -35,6 +36,13 @@ export interface ResolvedCluster extends ResolvedFrame {
 export interface LayoutReport {
   objects: Record<string, ResolvedObject>; clusters: Record<string, ResolvedCluster>;
   layers: Record<string, ResolvedFrame>; findings: Finding[];
+  units: Record<string, number>;
+  constraints?: {status: 'solved' | 'underconstrained'; dof: number;
+    dimensions: Record<string, LayoutConstraint & {actual: number; residual: number}>; redundant: string[]};
+}
+export interface LayoutConstraint {
+  type: 'coincident' | 'horizontal' | 'vertical' | 'distance' | 'angle' | 'equal_spacing' | 'symmetric';
+  refs: string[]; value?: Dimension; axis?: 'x' | 'y'; label?: string;
 }
 export interface NativeObject {
   kind: ObjectKind; label?: string; part?: string; cluster?: string; layer?: string;
@@ -43,7 +51,7 @@ export interface NativeObject {
 export interface NativeDocument {
   schema: 'ergogen/v1'; meta?: Record<string, unknown>; units?: Record<string, Dimension>;
   parts?: Record<string, unknown>;
-  layout: {objects?: Record<string, NativeObject>; clusters?: Record<string, unknown>; layers?: Record<string, unknown>};
+  layout: {objects?: Record<string, NativeObject>; clusters?: Record<string, unknown>; layers?: Record<string, unknown>; constraints?: Record<string, LayoutConstraint>};
   designs?: Record<string, unknown>; pcbs?: Record<string, unknown>;
 }
 export function process(input: string | NativeDocument, options?: Record<string, unknown>, logger?: (message: string) => void): Promise<{layout: LayoutReport; [key: string]: unknown}>;

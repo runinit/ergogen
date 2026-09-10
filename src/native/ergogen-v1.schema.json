@@ -231,6 +231,17 @@
                     }
                   ]
                 },
+                "solve": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "x",
+                      "y",
+                      "rotate"
+                    ]
+                  },
+                  "uniqueItems": true
+                },
                 "override": {
                   "type": "object",
                   "properties": {
@@ -440,6 +451,17 @@
                         "minLength": 1
                       }
                     ]
+                  },
+                  "solve": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "x",
+                        "y",
+                        "rotate"
+                      ]
+                    },
+                    "uniqueItems": true
                   },
                   "override": {
                     "type": "object",
@@ -707,6 +729,17 @@
                         }
                       ]
                     },
+                    "solve": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "x",
+                          "y",
+                          "rotate"
+                        ]
+                      },
+                      "uniqueItems": true
+                    },
                     "override": {
                       "type": "object",
                       "properties": {
@@ -827,6 +860,62 @@
             "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
           }
         },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "coincident",
+                  "horizontal",
+                  "vertical",
+                  "distance",
+                  "angle",
+                  "equal_spacing",
+                  "symmetric"
+                ]
+              },
+              "refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 2
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              "axis": {
+                "enum": [
+                  "x",
+                  "y"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "type",
+              "refs"
+            ],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+          }
+        },
         "layers": {
           "type": "object",
           "additionalProperties": {
@@ -899,6 +988,17 @@
                         "minLength": 1
                       }
                     ]
+                  },
+                  "solve": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "x",
+                        "y",
+                        "rotate"
+                      ]
+                    },
+                    "uniqueItems": true
                   },
                   "override": {
                     "type": "object",
@@ -1033,6 +1133,17 @@
                       }
                     ]
                   },
+                  "solve": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "x",
+                        "y",
+                        "rotate"
+                      ]
+                    },
+                    "uniqueItems": true
+                  },
                   "override": {
                     "type": "object",
                     "properties": {
@@ -1140,6 +1251,25 @@
                           "minLength": 1
                         }
                       ]
+                    }
+                  },
+                  "offsets": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        ]
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
                     }
                   },
                   "radius": {
@@ -1298,6 +1428,17 @@
                               "minLength": 1
                             }
                           ]
+                        },
+                        "solve": {
+                          "type": "array",
+                          "items": {
+                            "enum": [
+                              "x",
+                              "y",
+                              "rotate"
+                            ]
+                          },
+                          "uniqueItems": true
                         },
                         "override": {
                           "type": "object",
@@ -1564,6 +1705,17 @@
                                 "minLength": 1
                               }
                             ]
+                          },
+                          "solve": {
+                            "type": "array",
+                            "items": {
+                              "enum": [
+                                "x",
+                                "y",
+                                "rotate"
+                              ]
+                            },
+                            "uniqueItems": true
                           },
                           "override": {
                             "type": "object",
@@ -2884,6 +3036,17 @@
                   }
                 ]
               },
+              "solve": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "x",
+                    "y",
+                    "rotate"
+                  ]
+                },
+                "uniqueItems": true
+              },
               "override": {
                 "type": "object",
                 "properties": {
@@ -3016,6 +3179,17 @@
               "minLength": 1
             }
           ]
+        },
+        "solve": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "x",
+              "y",
+              "rotate"
+            ]
+          },
+          "uniqueItems": true
         },
         "override": {
           "type": "object",
@@ -3327,6 +3501,17 @@
                 }
               ]
             },
+            "solve": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "x",
+                  "y",
+                  "rotate"
+                ]
+              },
+              "uniqueItems": true
+            },
             "override": {
               "type": "object",
               "properties": {
@@ -3592,6 +3777,17 @@
                     "minLength": 1
                   }
                 ]
+              },
+              "solve": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "x",
+                    "y",
+                    "rotate"
+                  ]
+                },
+                "uniqueItems": true
               },
               "override": {
                 "type": "object",

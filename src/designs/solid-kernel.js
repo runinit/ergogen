@@ -3,6 +3,13 @@ const g = require('./geometry')
 
 const MESH_TOLERANCE = 0.01
 let initialized
+const chordError = (start, middle, end) => {
+    const dx = end[0] - start[0], dy = end[1] - start[1]
+    const square = dx * dx + dy * dy
+    if (square < g.EPSILON * g.EPSILON) { return Infinity }
+    const t = Math.max(0, Math.min(1, ((middle[0] - start[0]) * dx + (middle[1] - start[1]) * dy) / square))
+    return Math.hypot(middle[0] - start[0] - t * dx, middle[1] - start[1] - t * dy)
+}
 
 // Keep WASM and native handles behind one adapter shared by Node and workers.
 exports.open = async (options = {}) => {
@@ -27,7 +34,11 @@ exports.open = async (options = {}) => {
             let [start, end] = m.point.fromPathEnds(path)
             if (link.reversed) { [start, end] = [end, start] }
             return {path, start, end}
-        })
+        }).filter(({path, start, end}) => path.type !== 'arc' ||
+            m.measure.pathLength(path) >= g.TOLERANCE || chordError(start, m.point.middle(path), end) > g.EPSILON)
+        // Collapse offset arc remnants below export tolerance; the join check
+        // below still rejects accumulated gaps larger than that tolerance.
+        if (!segments.length && chain.pathLength < g.TOLERANCE) { return undefined }
         const edges = segments.map(({path, start, end}, index) => {
             if (path.type === 'circle') { return keep(r.makeCircle(path.radius, vector(path.origin))) }
             // MakerJS rounds endpoints more coarsely than the solid kernel.
@@ -37,7 +48,12 @@ exports.open = async (options = {}) => {
             }
             end = next
             if (path.type === 'arc') {
-                return keep(r.makeThreePointArc(vector(start), vector(m.point.middle(path)), vector(end)))
+                const middle = m.point.middle(path)
+                // Snapped micro-arcs can become collinear at CAD precision.
+                if (chordError(start, middle, end) <= g.EPSILON) {
+                    return keep(r.makeLine(vector(start), vector(end)))
+                }
+                return keep(r.makeThreePointArc(vector(start), vector(middle), vector(end)))
             }
             if (path.type !== 'line') { g.fail('designs', `Unsupported solid edge ${path.type}`) }
             return keep(r.makeLine(vector(start), vector(end)))
@@ -45,17 +61,21 @@ exports.open = async (options = {}) => {
         return keep(r.assembleWire(edges))
     }
     const extrudeChain = (chain, height) => {
-        const sketch = keep(new r.Sketch(wire(chain)))
+        const outline = wire(chain)
+        if (!outline) { return undefined }
+        const sketch = keep(new r.Sketch(outline))
         let result = keep(sketch.extrude(height))
         for (const child of chain.contains || []) {
-            result = keep(result.cut(extrudeChain(child, height)))
+            const hole = extrudeChain(child, height)
+            if (hole) { result = keep(result.cut(hole)) }
         }
         return result
     }
     const extrude = (model, height, z = 0) => {
         g.validate(model, 'designs.solid')
         const chains = m.model.findChains(model, {contain: true})
-        const solids = chains.map(chain => extrudeChain(chain, height))
+        const solids = chains.map(chain => extrudeChain(chain, height)).filter(Boolean)
+        if (!solids.length) { g.fail('designs.solid', 'No contour remains at export precision') }
         let result = solids[0]
         for (const next of solids.slice(1)) { result = keep(result.fuse(next)) }
         return z ? keep(result.translateZ(z)) : result

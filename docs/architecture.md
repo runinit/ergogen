@@ -17,7 +17,8 @@ flowchart TD
   Edit --> Client[Worker client and engine API]
   Client --> Compiler[Native compiler]
   Compiler --> Scene[Units, frames, layers, and typed objects]
-  Scene --> Geometry[Regions, boundaries, and profiles]
+  Scene --> Solver[Planar constraints and resolved placement]
+  Solver --> Geometry[Regions, boundaries, and profiles]
   Geometry --> Assembly[PCB and mechanical assembly compilation]
   Assembly --> Checks[Clearance and movement validation]
   Checks --> Adapters[Footprint and CAD adapters]
@@ -47,6 +48,19 @@ declares physical mounting frames. IDs are references; labels are presentation.
 PCB references are explicit or deterministic from object/binding IDs. Adding or
 reordering an object must preserve existing footprint references and net names.
 Numeric net codes are an export detail; net names carry electrical identity.
+
+Column arrangements use stable column and row IDs. A column frame applies pitch,
+stagger and `offsets.<column>: [x, y, z]`, then splay about its first row. Each
+row is placed inside that rotated frame; individual key overrides remain local.
+Changing column splay therefore moves and rotates the entire column.
+
+Keys receive automatic `column_net` and `row_net` properties unless explicitly
+overridden. Matrix defaults are `<cluster>_<column>` and `<cluster>_<row>`.
+Arc and free-cluster keys share `<cluster>_row` and have `<key>_column`; unclustered keys use
+`<key>_column` and `<key>_row`. Reordering IDs keeps these names stable.
+The GUI creates a matrix from numeric dimensions, edits columns as groups,
+and preserves removed cells until the user restores them. These commands
+retain the arrangement in YAML instead of replacing it with absolute points.
 
 `process()` returns `layout` alongside outlines, boards, and assemblies. The
 layout report contains objects, clusters, layers, world transforms, envelopes,
@@ -99,6 +113,57 @@ Body dimensions and offsets are relative to their own mounting frame.
 
 The compiler retains 3D transforms even though the first editor exposes planar
 movement, height, and in-plane rotation. Surface orientation supplies tilt.
+
+## Layout constraints
+
+Native constraints run after nominal frames and before points, outlines, PCB
+footprints or case inventory. `layout.constraints` is a named mapping. Rule IDs
+are stable diagnostic paths, including on cached analysis. Placement formulas
+supply the seed; only coordinates listed in `placement.solve` may move. Locks
+remove all solver freedoms. An arranged cluster moves as one frame, retaining
+its pitch, stagger, splay, arc parameters and object identities.
+
+```yaml
+units: {pitch: 19}
+layout:
+  objects:
+    a: {kind: key, part: mx}
+    b:
+      kind: key
+      part: mx
+      placement: {at: [18, 1, 0], solve: [x, y]}
+  constraints:
+    row: {type: horizontal, refs: [a, b]}
+    pitch: {type: distance, refs: [a, b], axis: x, value: pitch}
+```
+
+| Rule | References | Dimension |
+| --- | --- | --- |
+| `coincident` | Two origins or attachments | None |
+| `horizontal`, `vertical` | Two or more origins | None |
+| `distance` | Two origins | `value`, optional signed `axis: x/y` |
+| `angle` | Two oriented frames | Relative `value` in degrees |
+| `equal_spacing` | Ordered list of at least three origins | Equal vector spacing |
+| `symmetric` | Two origins and an axis frame | `axis: x/y`, default x |
+
+References accept object IDs, `objects.<id>`, `clusters.<id>`, named attachments,
+and `.origin`. `solve` accepts `x`, `y`, and `rotate`; omitted coordinates stay
+driven by placement. Distance without an axis is nonnegative Euclidean distance.
+Axis distances are signed from the first reference to the second. Equal spacing
+keeps all referenced points collinear in their supplied order.
+
+`native/constraints.js` adapts frame origins and directed axes to PlaneGCS.
+Rigid child relations, mirror relations, and locked frames are graph constraints.
+The adapter extracts only additive local offsets, re-resolves the scene and
+vertical stacking, then checks rule residuals. It never overwrites input values.
+The layout report exposes solved dimensions, remaining degrees of freedom and
+redundant rule IDs. Conflicting rules return source-path diagnostics and no new
+geometry. Underconstrained layouts remain usable and report their free movement.
+
+This solver is planar. Frames must have parallel mounting planes. Physical
+layers, `above`, `below`, and `gap` continue to own vertical relationships;
+these are not arbitrary 3D geometric constraints. The
+[constrained example](examples/native/constrained.yaml) is an executable reference.
 
 ## Geometry and validation
 
@@ -364,3 +429,8 @@ Post collision checks require overlapping Z intervals beyond the geometry
 tolerance before testing XY removal; touching faces do not block relief.
 Perimeter checks include exact curve bounds before containment sampling so
 short relief arcs cannot escape the minimum-wall envelope between samples.
+
+Solid conversion retains analytic arcs. Flat offset remnants below 0.01 mm
+length and 0.000001 mm chord error are collapsed, including empty sliver loops.
+Contour joins must remain within the existing 0.01 mm export tolerance. Rounded
+profiles are validated before conversion; native solid validity is checked after it.

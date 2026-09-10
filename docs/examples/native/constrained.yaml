@@ -1,0 +1,67 @@
+# Edit pitch and thumb_reach; placements remain parametric.
+schema: ergogen/v1
+meta: {name: Constrained layout}
+units: {pitch: 19, thumb_reach: pitch * 2}
+parts:
+  mx:
+    revision: '1'
+    envelopes:
+      pcb: {size: [18, 18]}
+      keycap: {size: [18, 18]}
+      plate: {size: [14, 14]}
+      body: {size: [14, 14], height: [0, 11.6]}
+    footprints:
+      switch:
+        what: mx
+        params: {from: '{{column_net}}', to: '{{row_net}}'}
+layout:
+  clusters:
+    thumbs:
+      arrangement: {type: arc, radius: 38, start: 0, step: 28}
+      placement: {at: [30, -24, 0], solve: [x]}
+  objects:
+    outer:
+      kind: key
+      part: mx
+      pcb: main
+      properties: {column_net: outer, row_net: home}
+    inner:
+      kind: key
+      part: mx
+      pcb: main
+      placement: {at: [18, 1, 0], solve: [x, y]}
+      properties: {column_net: inner, row_net: home}
+    thumb0:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: thumbs
+      index: 0
+      properties: {column_net: thumb0, row_net: thumb}
+    thumb1:
+      kind: key
+      part: mx
+      pcb: main
+      cluster: thumbs
+      index: 1
+      properties: {column_net: thumb1, row_net: thumb}
+  constraints:
+    home_row: {type: horizontal, refs: [outer, inner]}
+    key_pitch: {type: distance, refs: [outer, inner], axis: x, value: pitch}
+    thumb_reach: {type: distance, refs: [outer, clusters.thumbs], axis: x, value: thumb_reach}
+designs:
+  regions:
+    keys: {select: {kind: key}, envelope: keycap, close: 2}
+  boundaries:
+    edge:
+      from: regions.keys
+      bridges:
+        row: {from: {ref: outer}, to: {ref: inner}, width: 10, ends: flat}
+        neck: {from: {ref: inner}, to: {ref: thumb0}, width: 10, ends: flat}
+      clearance: 2
+      simplify: 2
+      corners: {fillet: 1}
+  profiles:
+    board: {from: boundaries.edge}
+pcbs:
+  main: {profile: profiles.board, thickness: 1.6}

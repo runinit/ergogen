@@ -8,7 +8,10 @@ const object = (properties, required = []) => ({type: 'object', properties, requ
 const list = schema => ({type: 'array', items: schema})
 const names = {anyOf: [text, list(text)]}
 const placement = object({ref: text, at: vector(3), rotate: dimension, tilt: dimension, above: text, below: text, gap: dimension,
+    solve: {type: 'array', items: {enum: ['x','y','rotate']}, uniqueItems: true},
     override: object({at: vector(3), rotate: dimension})})
+const constraint = object({type: {enum: ['coincident','horizontal','vertical','distance','angle','equal_spacing','symmetric']},
+    refs: {type: 'array', items: text, minItems: 2}, value: dimension, axis: {enum: ['x','y']}, label: text}, ['type','refs'])
 const envelope = object({size: vector(2), radius: dimension, height: vector(2), at: vector(3), rotate: dimension,
     clearance: dimension, corner_radius: dimension, corner_relief: dimension, polygon: list(vector(2))})
 const selector = object({kind: names, cluster: names, ids: list(text), pcb: text, layer: text})
@@ -31,9 +34,9 @@ module.exports = {
     $id: 'https://runinit.github.io/ergogen/schema/ergogen-v1.json',
     ...object({schema: {const: 'ergogen/v1'}, meta: mapping({}), units: mapping(dimension),
         parts: identities(object({revision: text, envelopes: mapping(envelope), attachments: mapping(placement), footprints: mapping(footprint), models: list(mapping({}))}, ['revision'])),
-        layout: object({objects: identities(item), layers: identities(object({surface: text, placement, assembly: text, motion: {enum: ['fixed','floating']}})),
+        layout: object({objects: identities(item), constraints: identities(constraint), layers: identities(object({surface: text, placement, assembly: text, motion: {enum: ['fixed','floating']}})),
             clusters: identities(object({label: text, layer: text, placement, locked: {type: 'boolean'},
-                arrangement: object({type: {enum: ['free','columns','arc']}, pitch: vector(2), columns: list(text), rows: list(text), stagger: mapping(dimension), splay: mapping(dimension), radius: dimension, start: dimension, step: dimension}, ['type']),
+                arrangement: object({type: {enum: ['free','columns','arc']}, pitch: vector(2), columns: list(text), rows: list(text), stagger: mapping(dimension), splay: mapping(dimension), offsets: mapping(vector(3)), radius: dimension, start: dimension, step: dimension}, ['type']),
                 mirror: object({source: text, axis: dimension}, ['source','axis']), overrides: mapping({...item, required: []})}))}),
         designs: object({regions: mapping(object({select: selector, envelope: text, wrap: {enum: ['tight','hull','box']}, shape, close: dimension, clearance: dimension, round: dimension,
             connected: {enum: ['single','multiple']}, modifications})), boundaries: mapping(boundary), profiles: mapping(boundary),

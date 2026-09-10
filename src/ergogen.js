@@ -20,7 +20,7 @@ const version = require('../package.json').version
 const compile = async (raw, options={}, logger=()=>{}) => {
 
     const native = require('./native/document').parse(raw)
-    const scene = require('./native/layout').resolve(native)
+    const scene = await require('./native/constraints').resolve(native,options)
     const geometry = require('./native/geometry')
     const config = native
     const {debug = false, svg = false} = options

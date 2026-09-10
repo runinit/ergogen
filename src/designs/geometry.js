@@ -167,10 +167,16 @@ const round = (model, radius) => {
     // Avoid exact arc collapse during erosion, within the export tolerance.
     for (const candidate of [radius, radius - TOLERANCE / 10]) {
         if (candidate <= 0) { continue }
-        const inset = offset(model, -candidate)
-        if (empty(inset)) { continue }
-        const rounded = offset(inset, candidate)
-        if (!empty(rounded)) { return rounded }
+        try {
+            const inset = offset(model, -candidate)
+            if (empty(inset)) { continue }
+            const rounded = offset(inset, candidate)
+            // Offset bounds alone can hide open arc fragments at exact tangencies.
+            validate(rounded, 'designs')
+            return rounded
+        } catch (error) {
+            if (!(error instanceof DesignError)) { throw error }
+        }
     }
     fail('designs', 'Rounding removes the complete profile; reduce its radius')
 }
