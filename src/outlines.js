@@ -395,7 +395,7 @@ exports.parse = (config, points, units) => {
 
             // a prototype "shape" maker (and its units) are computed
             const [shape_maker, shape_units] = injected[what]
-                ? [() => [injected[what](part, name, points, outlines, units), {}], units]
+                ? injected[what](part, name, points, outlines, units)
                 : whats[what](part, name, points, outlines, units)
             const adjust = start => anchor(original_adjust || {}, `${name}.adjust`, points, start)(shape_units)
 

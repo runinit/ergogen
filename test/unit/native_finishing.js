@@ -15,17 +15,25 @@ const fixture = corners => ({
 const generate = async input => (await engine.process(input,{debug:true,analysis:true})).designs.features['profiles.board'].model
 
 describe('SVG outline helper', () => {
-    it('converts multiple closed paths and mirrors SVG y coordinates', () => {
-        const outline = require('../../src/utils').svg_paths_to_outline([
+    it('returns the upstream shape-maker contract with origin and flips', () => {
+        const [make] = require('../../src/utils').svg_paths_to_outline([
             'M0 0 L10 0 L10 10 Z',
             'M20 20 L30 20 L30 30 Z'
-        ], {}, 'test')
-        assert.equal(Object.keys(outline.models).length, 2)
+        ], {origin: [20, 20], flip_horizontally: true}, 'test', {}, {}, {})
+        const [outline] = make({meta: {mirrored: false}})
         assert.equal(g.chains(outline).length, 2)
+        assert.deepEqual(m.measure.modelExtents(outline).low, [-10, -50])
+    })
+
+    it('supports a string path and mirrored anchors', () => {
+        const [make] = require('../../src/utils').svg_paths_to_outline('M0 0 L10 0 L10 10 Z', {}, 'test', {}, {}, {})
+        const [outline] = make({meta: {mirrored: true}})
+        assert.ok(m.measure.modelExtents(outline).low[0] < 0)
     })
 
     it('rejects open paths', () => {
-        assert.throws(() => require('../../src/utils').svg_paths_to_outline(['M0 0 L10 0'], {}, 'test'), /must be closed/)
+        const [make] = require('../../src/utils').svg_paths_to_outline(['M0 0 L10 0'], {}, 'test', {}, {}, {})
+        assert.throws(() => make({meta: {mirrored: false}}), /valid paths|closed shapes/)
     })
 
 })

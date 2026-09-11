@@ -1,30 +1,53 @@
 const m = require('makerjs')
 
-// Convert SVG path data into an outline model while preserving each closed path.
-exports.svg_paths_to_outline = (paths, config = {}, name = 'svg', points, outlines, units) => {
-    if (!Array.isArray(paths) || paths.length === 0) {
-        throw new Error(`SVG outline "${name}" must contain at least one path`)
-    }
+exports.svg_paths_to_outline = (paths_raw, config, name, points, outlines, units, accuracy = 0.0001) => {
+    const a = require('./assert')
+    a.unexpected(config, name, ['paths', 'accuracy', 'flip_horizontally', 'flip_vertically', 'origin'])
+    const actual_accuracy = a.sane(config.accuracy || accuracy, `${name}.accuracy`, 'number')(units)
+    a.assert(actual_accuracy !== 0, `Accuracy for SVG outline "${name}" cannot be 0!`)
+    const flip_horizontally = a.sane(config.flip_horizontally || false, `${name}.flip_horizontally`, 'boolean')(units)
+    const flip_vertically = a.sane(config.flip_vertically || false, `${name}.flip_vertically`, 'boolean')(units)
+    const origin = a.xy(config.origin || [0, 0], `${name}.origin`)(units)
 
-    const models = {}
-    for (const [index, data] of paths.entries()) {
-        if (typeof data !== 'string' || !data.trim()) {
-            throw new Error(`SVG outline "${name}" contains an invalid path at index ${index}`)
+    return [point => {
+        let paths = []
+        if (a.type(paths_raw)() == 'string') {
+            paths = [paths_raw]
+        } else if (a.type(paths_raw)() == 'array') {
+            paths = paths_raw
+        } else {
+            a.assert(false, `Field "paths" for SVG outline "${name}" must be a string or an array!`)
         }
-        const model = m.importer.fromSVGPathData(data)
-        const chains = m.model.findChains(model)
-        if (chains.length !== 1 || !chains[0].endless) {
-            throw new Error(`SVG outline "${name}" path ${index} must be closed`)
-        }
-        models[`path_${index}`] = model
-    }
 
-    const outline = {models}
-    const scale = config.scale === undefined ? 1 : Number(config.scale)
-    if (!Number.isFinite(scale) || scale <= 0) {
-        throw new Error(`SVG outline "${name}" scale must be positive`)
-    }
-    return scale === 1 ? outline : m.model.scale(outline, scale)
+        let combined
+        for (const [i, path] of paths.entries()) {
+            a.assert(a.type(path)() == 'string', `Path ${i} for SVG outline "${name}" must be a string!`)
+            const imported = m.importer.fromSVGPathData(path, actual_accuracy)
+            if (combined === undefined) {
+                combined = imported
+            } else {
+                combined = exports.union(combined, imported)
+                m.model.simplify(combined)
+            }
+        }
+        let shape = combined
+        if (origin[0] !== 0 || origin[1] !== 0) {
+            shape = m.model.moveRelative(shape, [-origin[0], -origin[1]])
+        }
+        if (flip_horizontally || flip_vertically) {
+            shape = m.model.mirror(shape, flip_horizontally, flip_vertically)
+        }
+        const chains = m.model.findChains(shape)
+        a.assert(chains.length > 0, `SVG outline "${name}" does not contain any valid paths!`)
+        for (const chain of chains) {
+            a.assert(chain.endless, `SVG paths need to be closed shapes (check failed for "${name}")`)
+        }
+        if (point.meta.mirrored) {
+            shape = m.model.mirror(shape, true, false)
+        }
+        const bbox = m.measure.modelExtents(shape)
+        return [shape, {low: bbox.low, high: bbox.high}]
+    }, units]
 }
 
 
