@@ -3,8 +3,12 @@ const fs = require('node:fs')
 const path = require('node:path')
 const assert = require('node:assert/strict')
 const yaml = require('js-yaml')
-const ergogen = require('../../src/ergogen')
+const ergogen = require('../helpers/adapter-engine')
 require('../helpers/mock').inject(ergogen)
+
+// Release labels may change while historical board geometry stays identical.
+const normalize = content => content.replace(/\r\n/g, '\n')
+    .replace(/\(generator_version "[^"]+"\)/g, '(generator_version "<version>")')
 
 ;(async () => {
     let count = 0
@@ -16,8 +20,8 @@ require('../helpers/mock').inject(ergogen)
             const prefix = file.slice(0, -5) + '___pcbs_'
             for (const snapshot of fs.readdirSync(directory).filter(name => name.startsWith(prefix))) {
                 const board = snapshot.slice(prefix.length, -'.kicad_pcb'.length)
-                assert.equal(result.pcbs[board].replace(/\r\n/g, '\n'),
-                    fs.readFileSync(path.join(directory, snapshot), 'utf8').replace(/\r\n/g, '\n'), snapshot)
+                assert.equal(normalize(result.pcbs[board]),
+                    normalize(fs.readFileSync(path.join(directory, snapshot), 'utf8')), snapshot)
                 count++
             }
         }

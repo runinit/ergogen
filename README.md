@@ -80,7 +80,7 @@ Until there's a proper "Getting started" guide, try getting acquainted with **Er
 Feature ideas, documentation improvements, examples, tests, or pull requests welcome!
 Get in touch on our **[Discord]**, and we can definitely find something you can help with, if you'd like to.
 
-From an administrative standpoint, please note that we'd like to keep the Git history linear and the test suite comprehensive, so if you do issue a PR, make sure it's A) a straight chain of commits, B) it's always rebased on the current `develop`, and C) the test coverage remains at 100%.
+From an administrative standpoint, please note that we'd like to keep the Git history linear and the test suite comprehensive, so if you do issue a PR, make sure it's A) a straight chain of commits, B) it's always rebased on the current `main`, and C) the test coverage remains at 100%.
 
 <br>
 
