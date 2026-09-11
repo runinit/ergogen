@@ -1908,6 +1908,10 @@
                 "type": "string",
                 "minLength": 1
               },
+              "outline": {
+                "type": "string",
+                "minLength": 1
+              },
               "wrap": {
                 "enum": [
                   "tight",
