@@ -38,7 +38,7 @@ module.exports = {
             clusters: identities(object({label: text, layer: text, placement, locked: {type: 'boolean'},
                 arrangement: object({type: {enum: ['free','columns','arc']}, pitch: vector(2), columns: list(text), rows: list(text), stagger: mapping(dimension), splay: mapping(dimension), offsets: mapping(vector(3)), radius: dimension, start: dimension, step: dimension}, ['type']),
                 mirror: object({source: text, axis: dimension}, ['source','axis']), overrides: mapping({...item, required: []})}))}),
-        designs: object({regions: mapping(object({select: selector, envelope: text, wrap: {enum: ['tight','hull','box']}, shape, close: dimension, clearance: dimension, round: dimension,
+        designs: object({regions: mapping(object({select: selector, envelope: text, outline: text, wrap: {enum: ['tight','hull','box']}, shape, close: dimension, clearance: dimension, round: dimension,
             connected: {enum: ['single','multiple']}, modifications})), boundaries: mapping(boundary), profiles: mapping(boundary),
             sketches: mapping(mapping({})), assemblies: mapping(object(Object.fromEntries(assemblyFields.map(key => [key, {}]))))}),
         pcbs: identities(object({profile: text, thickness: dimension, placement, references: {type: 'boolean'}, params: mapping({}), source: {enum:['asset']}, asset: text}, []))

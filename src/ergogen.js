@@ -38,6 +38,11 @@ const compile = async (raw, options={}, logger=()=>{}) => {
     if (preview) { results.demo = io.twodee(preview, {debug, svg}) }
     if (options.layoutOnly) { return results }
     const outlines = {}
+    for (const spec of Object.values(config.designs?.regions || {})) {
+        if (typeof spec.outline !== 'string' || Object.hasOwn(outlines, spec.outline)) { continue }
+        const model = require('./outlines').resolve(spec.outline, spec, points, outlines, units)
+        if (model) { outlines[spec.outline] = model }
+    }
     let nativeBoards = {}
     let caseConfig = {}
     if (config.designs) {

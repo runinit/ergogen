@@ -10,6 +10,14 @@ const hulljs = require('hull')
 
 const injected = {}
 exports.inject = (name, outline) => { injected[name] = outline }
+exports.resolve = (name, config, points, outlines, units) => {
+    if (!injected[name]) { return undefined }
+    const source = {...config}
+    delete source.outline
+    const [make] = injected[name](source, name, points, outlines, units)
+    const [model] = make({meta: {mirrored: false}})
+    return model
+}
 
 const binding = (base, bbox, point, units) => {
 

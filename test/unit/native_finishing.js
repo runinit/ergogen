@@ -36,6 +36,20 @@ describe('SVG outline helper', () => {
         assert.throws(() => make({meta: {mirrored: false}}), /valid paths|closed shapes/)
     })
 
+    it('generates an injected SVG region through native designs', async () => {
+        engine.inject('outline', 'test_svg', config => require('../../src/utils').svg_paths_to_outline(
+            'M0 0 L10 0 L10 10 Z', config, 'test_svg', {}, {}, {}
+        ))
+        const result = await engine.process({
+            schema: 'ergogen/v1', layout: {},
+            designs: {
+                regions: {svg: {outline: 'test_svg'}},
+                profiles: {board: {from: 'regions.svg'}}
+            }
+        }, {debug: true})
+        assert.ok(result.designs.features['profiles.board'])
+    })
+
 })
 
 describe('Native perimeter finishing', () => {
