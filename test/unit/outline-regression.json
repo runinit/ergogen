@@ -1,0 +1,217 @@
+{
+  "schema": "ergogen/v1",
+  "parts": {
+    "key": {
+      "revision": "1",
+      "envelopes": {
+        "keycap": {
+          "size": [
+            18,
+            18
+          ]
+        }
+      }
+    }
+  },
+  "layout": {
+    "objects": {
+      "fingers_c1_r2": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c1", "r2"]},
+      "fingers_c1_r2_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c1_r2", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c1_r2_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c1_r2", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c1_r3": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c1", "r3"]},
+      "fingers_c1_r3_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c1_r3", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c1_r3_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c1_r3", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c1_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c1", "r4"]},
+      "fingers_c1_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c1_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c1_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c1_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c1_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c1", "r5"]},
+      "fingers_c1_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c1_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c1_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c1_r5", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c2_r2": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c2", "r2"]},
+      "fingers_c2_r2_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c2_r2", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c2_r2_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c2_r2", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c2_r3": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c2", "r3"]},
+      "fingers_c2_r3_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c2_r3", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c2_r3_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c2_r3", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c2_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c2", "r4"]},
+      "fingers_c2_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c2_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c2_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c2_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c2_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c2", "r5"]},
+      "fingers_c2_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c2_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c2_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c2_r5", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c3_r1": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c3", "r1"]},
+      "fingers_c3_r1_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c3_r1", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c3_r1_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c3_r1", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c3_r2": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c3", "r2"]},
+      "fingers_c3_r2_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c3_r2", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c3_r2_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c3_r2", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c3_r3": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c3", "r3"]},
+      "fingers_c3_r3_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c3_r3", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c3_r3_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c3_r3", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c3_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c3", "r4"]},
+      "fingers_c3_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c3_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c3_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c3_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c3_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c3", "r5"]},
+      "fingers_c3_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c3_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c3_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c3_r5", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c4_r1": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c4", "r1"]},
+      "fingers_c4_r1_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c4_r1", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c4_r1_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c4_r1", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c4_r2": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c4", "r2"]},
+      "fingers_c4_r2_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c4_r2", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c4_r2_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c4_r2", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c4_r3": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c4", "r3"]},
+      "fingers_c4_r3_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c4_r3", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c4_r3_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c4_r3", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c4_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c4", "r4"]},
+      "fingers_c4_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c4_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c4_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c4_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c4_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c4", "r5"]},
+      "fingers_c4_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c4_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c4_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c4_r5", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c5_r1": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c5", "r1"]},
+      "fingers_c5_r1_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c5_r1", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c5_r1_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c5_r1", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c5_r2": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c5", "r2"]},
+      "fingers_c5_r2_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c5_r2", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c5_r2_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c5_r2", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c5_r3": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c5", "r3"]},
+      "fingers_c5_r3_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c5_r3", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c5_r3_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c5_r3", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c5_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c5", "r4"]},
+      "fingers_c5_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c5_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c5_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c5_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c5_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c5", "r5"]},
+      "fingers_c5_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c5_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c5_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c5_r5", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c6_r1": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c6", "r1"]},
+      "fingers_c6_r1_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c6_r1", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c6_r1_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c6_r1", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c6_r2": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c6", "r2"]},
+      "fingers_c6_r2_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c6_r2", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c6_r2_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c6_r2", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c6_r3": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c6", "r3"]},
+      "fingers_c6_r3_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c6_r3", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c6_r3_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c6_r3", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c6_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c6", "r4"]},
+      "fingers_c6_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c6_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c6_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c6_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c6_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c6", "r5"]},
+      "fingers_c6_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c6_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c6_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c6_r5", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c7_r4": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c7", "r4"], "envelopes": {"keycap": {"size": [18, 27.525]}}, "placement": {"override": {"at": [0, -4.7625, 0]}}},
+      "fingers_c7_r4_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c7_r4", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c7_r4_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c7_r4", "at": [0, 5, 0], "rotate": 0}},
+      "fingers_c7_r5": {"kind": "key", "part": "key", "pcb": "main", "cluster": "fingers", "cell": ["c7", "r5"]},
+      "fingers_c7_r5_diode": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [4, 2]}}, "placement": {"ref": "fingers_c7_r5", "at": [-8, -7.25, 0], "rotate": 90}},
+      "fingers_c7_r5_led": {"kind": "component", "pcb": "main", "envelopes": {"pcb": {"size": [5, 5]}}, "placement": {"ref": "fingers_c7_r5", "at": [0, 5, 0], "rotate": 0}},
+      "controller": {"kind": "component", "pcb": "main", "layer": "main", "envelopes": {"pcb": {"size": [18, 34]}}, "placement": {"at": [134.3, 60.95, 0]}},
+      "battery_connector": {"kind": "component", "pcb": "main", "layer": "main", "envelopes": {"pcb": {"size": [8, 8]}}, "placement": {"at": [113.15228, 8.548449, 0]}},
+      "power_switch": {"kind": "component", "pcb": "main", "layer": "main", "envelopes": {"pcb": {"size": [8, 4]}}, "placement": {"at": [110.25, 83.2, 0]}}
+    },
+    "clusters": {
+      "fingers": {
+        "layer": "main",
+        "arrangement": {
+          "type": "columns",
+          "columns": [
+            "c1",
+            "c2",
+            "c3",
+            "c4",
+            "c5",
+            "c6",
+            "c7"
+          ],
+          "rows": [
+            "r1",
+            "r2",
+            "r3",
+            "r4",
+            "r5"
+          ],
+          "pitch": [
+            19.05,
+            19.05
+          ],
+          "stagger": {
+            "c1": -7.25,
+            "c2": -7.25,
+            "c3": 2.5,
+            "c4": 5,
+            "c5": 2.5,
+            "c7": -7.25
+          }
+        }
+      }
+    },
+    "layers": {
+      "main": {
+        "surface": "pcb.main.top"
+      }
+    }
+  },
+  "designs": {
+    "regions": {
+      "main": {
+        "select": {
+          "pcb": "main",
+          "kind": "key"
+        },
+        "envelope": "keycap",
+        "close": 2
+      },
+      "main_components": {
+        "select": {
+          "pcb": "main",
+          "kind": "component"
+        },
+        "envelope": "pcb"
+      }
+    },
+    "boundaries": {
+      "main": {
+        "from": [
+          "regions.main",
+          "regions.main_components"
+        ],
+        "bridges": {
+          "battery_connector": {
+            "from": {
+              "ref": "controller"
+            },
+            "to": {
+              "ref": "battery_connector"
+            },
+            "width": 8
+          },
+          "power_switch": {
+            "from": {
+              "ref": "controller"
+            },
+            "to": {
+              "ref": "power_switch"
+            },
+            "width": 8
+          }
+        },
+        "clearance": 2,
+        "connected": "single",
+        "corners": {
+          "fillet": 2
+        }
+      }
+    },
+    "profiles": {
+      "main": {
+        "from": "boundaries.main"
+      }
+    }
+  },
+  "pcbs": {
+    "main": {
+      "profile": "profiles.main",
+      "thickness": 1.6
+    }
+  }
+}

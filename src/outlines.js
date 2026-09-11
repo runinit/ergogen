@@ -8,6 +8,9 @@ const anchor = require('./anchor').parse
 const filter = require('./filter').parse
 const hulljs = require('hull')
 
+const injected = {}
+exports.inject = (name, outline) => { injected[name] = outline }
+
 const binding = (base, bbox, point, units) => {
 
     let bind = a.trbl(point.meta.bind || 0, `${point.meta.name}.bind`)(units)
@@ -361,7 +364,8 @@ exports.parse = (config, points, units) => {
 
             // process keys that are common to all part declarations
             const operation = u[a.in(part.operation || 'add', `${name}.operation`, ['add', 'subtract', 'intersect', 'stack'])]
-            const what = a.in(part.what || 'outline', `${name}.what`, ['rectangle', 'circle', 'polygon', 'outline', 'path', 'hull'])
+            const whatName = part.what || 'outline'
+            const what = injected[whatName] ? whatName : a.in(whatName, `${name}.what`, ['rectangle', 'circle', 'polygon', 'outline', 'path', 'hull'])
             const bound = !!part.bound
             const asym = a.asym(part.asym || 'source', `${name}.asym`)
 
@@ -390,7 +394,9 @@ exports.parse = (config, points, units) => {
             delete part.scale
 
             // a prototype "shape" maker (and its units) are computed
-            const [shape_maker, shape_units] = whats[what](part, name, points, outlines, units)
+            const [shape_maker, shape_units] = injected[what]
+                ? [() => [injected[what](part, name, points, outlines, units), {}], units]
+                : whats[what](part, name, points, outlines, units)
             const adjust = start => anchor(original_adjust || {}, `${name}.adjust`, points, start)(shape_units)
 
             // and then the shape is repeated for all where positions

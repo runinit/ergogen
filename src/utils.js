@@ -1,5 +1,32 @@
 const m = require('makerjs')
 
+// Convert SVG path data into an outline model while preserving each closed path.
+exports.svg_paths_to_outline = (paths, config = {}, name = 'svg', points, outlines, units) => {
+    if (!Array.isArray(paths) || paths.length === 0) {
+        throw new Error(`SVG outline "${name}" must contain at least one path`)
+    }
+
+    const models = {}
+    for (const [index, data] of paths.entries()) {
+        if (typeof data !== 'string' || !data.trim()) {
+            throw new Error(`SVG outline "${name}" contains an invalid path at index ${index}`)
+        }
+        const model = m.importer.fromSVGPathData(data)
+        const chains = m.model.findChains(model)
+        if (chains.length !== 1 || !chains[0].endless) {
+            throw new Error(`SVG outline "${name}" path ${index} must be closed`)
+        }
+        models[`path_${index}`] = model
+    }
+
+    const outline = {models}
+    const scale = config.scale === undefined ? 1 : Number(config.scale)
+    if (!Number.isFinite(scale) || scale <= 0) {
+        throw new Error(`SVG outline "${name}" scale must be positive`)
+    }
+    return scale === 1 ? outline : m.model.scale(outline, scale)
+}
+
 
 exports.deepcopy = value => {
     if (value === undefined) return undefined

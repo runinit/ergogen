@@ -14,7 +14,32 @@ const fixture = corners => ({
 })
 const generate = async input => (await engine.process(input,{debug:true,analysis:true})).designs.features['profiles.board'].model
 
+describe('SVG outline helper', () => {
+    it('converts multiple closed paths and mirrors SVG y coordinates', () => {
+        const outline = require('../../src/utils').svg_paths_to_outline([
+            'M0 0 L10 0 L10 10 Z',
+            'M20 20 L30 20 L30 30 Z'
+        ], {}, 'test')
+        assert.equal(Object.keys(outline.models).length, 2)
+        assert.equal(g.chains(outline).length, 2)
+    })
+
+    it('rejects open paths', () => {
+        assert.throws(() => require('../../src/utils').svg_paths_to_outline(['M0 0 L10 0'], {}, 'test'), /must be closed/)
+    })
+
+})
+
 describe('Native perimeter finishing', () => {
+    it('rounds the bridged keyboard without introducing a hole', async function() {
+        this.timeout(15000)
+        const input = require('./outline-regression.json')
+        const result = await engine.process(input,{debug:true,analysis:true})
+        const board = result.designs.features['boundaries.main'].model
+        g.validate(board,'board','single')
+        assert.equal(g.chains(board)[0].contains?.length || 0,0)
+    })
+
     it('adds a tangent inside fillet without removing support', async () => {
         const board = await generate(fixture({fillet:3}))
         assert.ok(g.contains(board,new m.models.ConnectTheDots(true,stock)))

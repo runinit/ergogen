@@ -131,6 +131,8 @@ const inject = (type, name, value) => {
             return pcbs_lib.inject_footprint(name, value)
         case 'template':
             return pcbs_lib.inject_template(name, value)
+        case 'outline':
+            return require('./outlines').inject(name, value)
         default:
             throw new Error(`Unknown injection type "${type}" with name "${name}" and value "${value}"!`)
     }

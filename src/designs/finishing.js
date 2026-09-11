@@ -137,7 +137,12 @@ const filletInside = (model,radius) => {
         }
     }
     // Short stagger steps can require a fillet to span an adjacent convex arc.
-    return unresolved?g.close(result,radius):result
+    if (!unresolved) { return result }
+    const closed=g.close(result,radius)
+    // Closing a narrow bay can enclose a new void; a solid perimeter needs that filled.
+    // Existing holes retain the topology guard and must never be filled implicitly.
+    if (g.chains(model).some(chain=>chain.contains?.length)) { return closed }
+    return g.union(g.chains(closed).map(chain=>m.chain.toNewModel(chain)))
 }
 const bevelArc = (path,model) => {
     const midpoint=m.point.middle(path), vector=subtract(path.origin,midpoint)
