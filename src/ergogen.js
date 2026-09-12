@@ -27,7 +27,8 @@ const compile = async (raw, options={}, logger=()=>{}) => {
     let empty = true
     const units = scene.units
     const points = geometry.points(scene)
-    const results = {layout: geometry.serializable(scene)}
+    const stackups=require('./native/stackups')
+    const results = {layout: geometry.serializable(scene),stackups:stackups.inspect(config,scene)}
     if (debug) {
         results.raw = raw
         results.canonical = u.deepcopy(config)
@@ -51,7 +52,7 @@ const compile = async (raw, options={}, logger=()=>{}) => {
             }))
             analysisKey = JSON.stringify([{...config, designs:{...config.designs, assemblies}}, options.assets])
         }
-        const design = await designs_lib.parse(config.designs, points, outlines, units, {...options, analysisKey,
+        const design = await designs_lib.parse(Object.fromEntries(Object.entries(config.designs).filter(([key])=>key!=='stackups')), points, outlines, units, {...options, analysisKey,
             scene, region: (spec, path) => geometry.region(scene, spec, path),
             shape: (spec,path,point) => geometry.project({matrix:require('./native/frames').local([point.x,point.y,0],point.r),sourcePath:path},scene.envelope(spec,path)),
             boardSources: generated => {
@@ -75,6 +76,9 @@ const compile = async (raw, options={}, logger=()=>{}) => {
             empty = false
         }
     }
+    Object.assign(outlines,stackups.compile(config,scene,outlines,results.stackups))
+    const sheets=await stackups.solids(config,scene,outlines,results.stackups,options)
+    if (Object.keys(sheets).length) { results.solids={...results.solids,...sheets} }
     results.outlines = {}
     for (const [name, outline] of Object.entries(outlines)) {
         if (!debug && name.startsWith('_')) continue

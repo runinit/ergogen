@@ -30,7 +30,7 @@ const parse = raw => {
         error.diagnostics = errors
         throw error
     }
-    return JSON.parse(JSON.stringify(value))
+    return require('./stackups').linked(JSON.parse(JSON.stringify(value)))
 }
 const locate = (raw, findings) => {
     if (typeof raw !== 'string' || !findings?.length) { return }

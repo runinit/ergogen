@@ -15,6 +15,7 @@ const compile = (config,scene,outlines,points) => {
     const boards={}
     for (const [id,spec] of Object.entries(config.pcbs || {})) {
         if (spec.source==='asset') { continue }
+        if (!spec.profile && !Object.values(scene.objects).some(item=>item.pcb===id)) { continue }
         const profile=spec.profile?.replace(/^profiles\./,'')
         const model=outlines[profile]
         if (!model) { g.fail(`pcbs.${id}.profile`,'Choose an independent named board profile','reference') }

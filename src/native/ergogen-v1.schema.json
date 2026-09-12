@@ -867,6 +867,7 @@
             "properties": {
               "type": {
                 "enum": [
+                  "aligned",
                   "coincident",
                   "horizontal",
                   "vertical",
@@ -1847,6 +1848,146 @@
     "designs": {
       "type": "object",
       "properties": {
+        "stackups": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "pcb": {
+                "type": "string",
+                "minLength": 1
+              },
+              "plate": {
+                "type": "object",
+                "properties": {
+                  "thickness": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  },
+                  "gap": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              "layers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "material": {
+                      "enum": [
+                        "foam",
+                        "silicone",
+                        "gasket"
+                      ]
+                    },
+                    "lower": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "upper": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "thickness": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "compression": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "inset": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "clearance": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      ]
+                    },
+                    "profile": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "cutouts": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "material",
+                    "lower",
+                    "upper",
+                    "thickness"
+                  ],
+                  "additionalProperties": false
+                },
+                "propertyNames": {
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+                }
+              }
+            },
+            "required": [
+              "pcb"
+            ],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+          }
+        },
         "regions": {
           "type": "object",
           "additionalProperties": {
@@ -2914,6 +3055,7 @@
               "supplier": {},
               "board": {},
               "manufacturing": {},
+              "stackup": {},
               "wall": {},
               "floor": {},
               "height": {},

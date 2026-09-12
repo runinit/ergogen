@@ -33,7 +33,11 @@ export interface ResolvedObject extends ResolvedFrame {
 export interface ResolvedCluster extends ResolvedFrame {
   id: string; label: string; locked: boolean;
 }
+export interface LayoutGuide {
+  id: string; label: string; position: Vec3; matrix: number[]; pcb?: string; members: string[]; axes: ('x' | 'y')[];
+}
 export interface LayoutReport {
+  guides?: Record<string, LayoutGuide>;
   objects: Record<string, ResolvedObject>; clusters: Record<string, ResolvedCluster>;
   layers: Record<string, ResolvedFrame>; findings: Finding[];
   units: Record<string, number>;
@@ -41,7 +45,7 @@ export interface LayoutReport {
     dimensions: Record<string, LayoutConstraint & {actual: number; residual: number}>; redundant: string[]};
 }
 export interface LayoutConstraint {
-  type: 'coincident' | 'horizontal' | 'vertical' | 'distance' | 'angle' | 'equal_spacing' | 'symmetric';
+  type: 'aligned' | 'coincident' | 'horizontal' | 'vertical' | 'distance' | 'angle' | 'equal_spacing' | 'symmetric';
   refs: string[]; value?: Dimension; axis?: 'x' | 'y'; label?: string;
 }
 export interface NativeObject {

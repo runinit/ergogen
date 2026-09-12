@@ -10,7 +10,7 @@ const names = {anyOf: [text, list(text)]}
 const placement = object({ref: text, at: vector(3), rotate: dimension, tilt: dimension, above: text, below: text, gap: dimension,
     solve: {type: 'array', items: {enum: ['x','y','rotate']}, uniqueItems: true},
     override: object({at: vector(3), rotate: dimension})})
-const constraint = object({type: {enum: ['coincident','horizontal','vertical','distance','angle','equal_spacing','symmetric']},
+const constraint = object({type: {enum: ['aligned','coincident','horizontal','vertical','distance','angle','equal_spacing','symmetric']},
     refs: {type: 'array', items: text, minItems: 2}, value: dimension, axis: {enum: ['x','y']}, label: text}, ['type','refs'])
 const envelope = object({size: vector(2), radius: dimension, height: vector(2), at: vector(3), rotate: dimension,
     clearance: dimension, corner_radius: dimension, corner_relief: dimension, polygon: list(vector(2))})
@@ -27,7 +27,7 @@ const boundary = object({from: names, close: dimension, clearance: dimension, ro
     connected: {enum: ['single', 'multiple']}, modifications, bridges: mapping(object({from: mapping({}), to: mapping({}), width: dimension, ends: {enum: ['round','flat']}, align: {enum: ['top','bottom','left','right']}}, ['from', 'to', 'width'])),
     cutouts: list(text), gaps: list(text)})
 const assemblyFields = ['preset','profile','plate_profile','pcb_profile','mounting','construction','supplier','board','manufacturing',
-    'wall','floor','height','lid','plate','plate_z','pcb_z','pcb_thickness','bezel','fit','internal_radius','opening','openings','components',
+    'stackup','wall','floor','height','lid','plate','plate_z','pcb_z','pcb_thickness','bezel','fit','internal_radius','opening','openings','components',
     'cutouts','mounts','gaskets','gasket','ledge','seam','typing_angle','front_height','fillet','chamfer','mount_count','spacing','layers','thickness','clearance']
 module.exports = {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -38,7 +38,7 @@ module.exports = {
             clusters: identities(object({label: text, layer: text, placement, locked: {type: 'boolean'},
                 arrangement: object({type: {enum: ['free','columns','arc']}, pitch: vector(2), columns: list(text), rows: list(text), stagger: mapping(dimension), splay: mapping(dimension), offsets: mapping(vector(3)), radius: dimension, start: dimension, step: dimension}, ['type']),
                 mirror: object({source: text, axis: dimension}, ['source','axis']), overrides: mapping({...item, required: []})}))}),
-        designs: object({regions: mapping(object({select: selector, envelope: text, wrap: {enum: ['tight','hull','box']}, shape, close: dimension, clearance: dimension, round: dimension,
+        designs: object({stackups: identities(object({pcb:text,plate:object({thickness:dimension,gap:dimension}),layers:identities(object({label:text,material:{enum:['foam','silicone','gasket']},lower:text,upper:text,thickness:dimension,compression:dimension,inset:dimension,clearance:dimension,profile:text,cutouts:list(text)},['material','lower','upper','thickness']))},['pcb'])),regions: mapping(object({select: selector, envelope: text, wrap: {enum: ['tight','hull','box']}, shape, close: dimension, clearance: dimension, round: dimension,
             connected: {enum: ['single','multiple']}, modifications})), boundaries: mapping(boundary), profiles: mapping(boundary),
             sketches: mapping(mapping({})), assemblies: mapping(object(Object.fromEntries(assemblyFields.map(key => [key, {}]))))}),
         pcbs: identities(object({profile: text, thickness: dimension, placement, references: {type: 'boolean'}, params: mapping({}), source: {enum:['asset']}, asset: text}, []))

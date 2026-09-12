@@ -8,7 +8,7 @@ const AXIS_LENGTH = 10
 const wrap = (angle) => ((angle + 540) % 360) - 180
 const key = (ref) => {
     const normalized = ref.replace(/\.origin$/, "")
-    return /^(objects|clusters|layers|mirror)\./.test(normalized) ||
+    return /^(objects|clusters|layers|mirror|columns|rows)\./.test(normalized) ||
         normalized === "world"
         ? normalized
         : `objects.${normalized}`
@@ -61,7 +61,7 @@ exports.resolve = async (config, options = {}) => {
     const inverse = f.inverse(plane)
     const planar = (matrix, path) => {
         const relative = f.multiply(inverse, matrix)
-        if (Math.abs(relative[10] - 1) > TOLERANCE) {
+        if (Math.abs(Math.abs(relative[10]) - 1) > TOLERANCE) {
             g.fail(
                 path,
                 "Layout constraints require parallel mounting planes",
@@ -186,7 +186,7 @@ exports.resolve = async (config, options = {}) => {
             entry?.path || reference
         )
         if (!entry) {
-            nodes[id] = fixed(matrix)
+            nodes[id] = resolved.guideParent ? rigid(frame(resolved.guideParent), matrix) : fixed(matrix)
         } else if (entry.mirror) {
             const original = frame(entry.mirror)
             if (!original.dynamic) {
@@ -270,6 +270,11 @@ exports.resolve = async (config, options = {}) => {
         const [a, b, c] = refs
         const pair = { p1_id: a.p, p2_id: b.p }
         switch (spec.type) {
+            case "aligned": {
+                const guide = spec.axis === 'y' ? rigid(b, f.multiply(b.matrix, f.local([0,0,0],90))) : b
+                add({type:'point_on_line_pl',p_id:a.p,l_id:guide.l},id)
+                break
+            }
             case "coincident":
                 add({ type: "p2p_coincident", ...pair }, id)
                 break
@@ -429,6 +434,11 @@ exports.resolve = async (config, options = {}) => {
         if (spec.type === "angle") {
             actual = wrap(f.yaw(b) - f.yaw(a))
             residual = Math.abs(wrap(actual - value))
+        }
+        if (spec.type === "aligned") {
+            const tangent = spec.axis === 'y' ? [b[1],b[5]] : [b[0],b[4]]
+            actual = dx * -tangent[1] + dy * tangent[0]
+            residual = Math.abs(actual)
         }
         if (spec.type === "coincident") {
             residual = Math.hypot(dx, dy)

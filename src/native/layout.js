@@ -243,6 +243,8 @@ const resolve = (config, offsets = {}) => {
         })
     }
     const reference = name => {
+        const guide = require('./guides').resolve(name,{...config,layout:{...config.layout,objects:definitions}},object,cluster,number)
+        if (guide) { return guide }
         if (name==='world') { return world }
         if (name.startsWith('layers.')) { return layer(name.slice(7)) }
         if (name.startsWith('clusters.')) { return cluster(name.slice(9)) }
@@ -258,6 +260,7 @@ const resolve = (config, offsets = {}) => {
             at[2]+=shape.height[face==='top'?1:0]
             return {...result,matrix:f.multiply(result.matrix,f.local(at)),position:f.transform(result.matrix,at)}
         }
+        if (key==='center' && tail.length===1 && !result.attachments.center) { return require('./guides').center(result) }
         const attachment=result.attachments[key]
         if (!attachment || tail.length!==1) { g.fail(name,'Missing named attachment','reference') }
         return guarded(`attachment.${name}`,()=>placed(attachment,result,`${result.sourcePath}.attachments.${key}`))
@@ -279,7 +282,11 @@ const resolve = (config, offsets = {}) => {
     for (const id of Object.keys(config.layout.layers || {})) { layer(id) }
     for (const id of Object.keys(config.layout.clusters || {})) { cluster(id) }
     for (const id of Object.keys(definitions)) { object(id) }
+    for (const [id,item] of Object.entries(clusters)) {
+        item.columnSplay=Object.fromEntries(Object.entries(config.layout.clusters[id]?.arrangement?.splay || {}).map(([key,value])=>[key,number(value,`layout.clusters.${id}.arrangement.splay.${key}`)]))
+    }
     const scene={objects,clusters,layers,units:values,findings,number,envelope,reference,boardFrame,assemblyFrame,placements}
+    scene.guides=require('./guides').list(scene,config)
     findings.push(...require('./clearance').check(config,scene))
     return scene
 }
